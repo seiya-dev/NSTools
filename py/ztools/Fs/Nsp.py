@@ -8410,7 +8410,7 @@ class Nsp(Pfs0):
 				if file.endswith('cnmt.nca'):
 					for f in self:
 						if str(f._path) == file:
-							message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+							message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 							for nf in f:
 								nf.rewind()
 								test=nf.read(0x4)
@@ -8423,7 +8423,7 @@ class Nsp(Pfs0):
 				elif file.endswith('.nca'):
 					for f in self:
 						if str(f._path) == file:
-							message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+							message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 
 							if str(f.header.contentType) != 'Content.PROGRAM':
 								correct = self.verify_enforcer(file)
@@ -8459,7 +8459,7 @@ class Nsp(Pfs0):
 						if str(f._path)[:-1] == file[:-1]:
 							ncztype=Nca(f)
 							ncztype._path=f._path
-							message=(str(ncztype.header.titleId)+' - '+str(ncztype.header.contentType));print(message);feed+=message+'\n'
+							message=(str(ncztype.header.titleId)+' - '+str(ncztype.header.contentType._name_));print(message);feed+=message+'\n'
 							correct=self.verify_ncz(file)
 							break
 				elif file.endswith('.tik'):
@@ -8618,7 +8618,7 @@ class Nsp(Pfs0):
 		for f in self:
 			if type(f) == Nca and f.header.contentType != Type.Content.META:
 				hlisthash=False
-				message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+				message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 				verify,origheader,ncaname,feed,origkg,tr,tkey,iGC=f.verify(feed)
 				# headerlist.append([ncaname,origheader,hlisthash])
 				headerlist.append([ncaname,origheader,hlisthash,tr,tkey,iGC])
@@ -8630,7 +8630,7 @@ class Nsp(Pfs0):
 				hlisthash=False
 				ncz=Nca(f)
 				ncz._path=f._path
-				message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType));print(message);feed+=message+'\n'
+				message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType._name_));print(message);feed+=message+'\n'
 				verify,origheader,ncaname,feed,origkg,tr,tkey,iGC=ncz.verify(feed)
 				# headerlist.append([ncaname,origheader,hlisthash])
 				headerlist.append([ncaname,origheader,hlisthash,tr,tkey,iGC])
@@ -8643,7 +8643,7 @@ class Nsp(Pfs0):
 			if type(f) == Nca and f.header.contentType == Type.Content.META:
 				meta_nca=f._path
 				f.rewind();meta_dat=f.read()
-				message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+				message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 				targetkg,minrsv=self.find_addecuatekg(meta_nca,keygenerationlist)
 				verify,origheader,ncaname,feed,origkg,tr,tkey,iGC=f.verify(feed)
 				if verify == False and cnmt!='check':
@@ -8828,7 +8828,7 @@ class Nsp(Pfs0):
 						if listedhash=='patched':
 							listedhash=False
 						break
-				message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+				message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 				ncasize=f.header.size
 				t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
 				i=0
@@ -9661,7 +9661,7 @@ class Nsp(Pfs0):
 	def get_data_from_cnmt(self,cnmtname):
 		for nca in self:
 			if type(nca) == Nca:
-				if 	str(nca.header.contentType) == 'Content.META':
+				if nca.header.contentType._name_ == 'META':
 					if str(nca._path)==cnmtname:
 						crypto1=nca.header.getCryptoType()
 						crypto2=nca.header.getCryptoType2()
@@ -10164,8 +10164,9 @@ class Nsp(Pfs0):
 
 	def verify_ncz(self,target):
 		files_list=sq_tools.ret_nsp_offsets(self._path)
-		files=list();
+		files=list()
 		fplist=list()
+		
 		for k in range(len(files_list)):
 			entry=files_list[k]
 			fplist.append(entry[0])
@@ -10176,7 +10177,6 @@ class Nsp(Pfs0):
 				titleid,titleversion,base_ID,keygeneration,rightsId,RSV,RGV,ctype,metasdkversion,exesdkversion,hasHtmlManual,Installedsize,DeltaSize,ncadata=self.get_data_from_cnmt(filepath)
 				for j in range(len(ncadata)):
 					row=ncadata[j]
-					# print(row)
 					if row['NCAtype']!='Meta':
 						test1=str(row['NcaId'])+'.nca';test2=str(row['NcaId'])+'.ncz'
 						if test1 in fplist or test2 in fplist:
@@ -10256,7 +10256,7 @@ class Nsp(Pfs0):
 						origheader=headerlist[i][1]
 						listedhash=headerlist[i][2]
 						break
-				message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+				message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 				ncasize=f.header.size
 				t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
 				i=0
@@ -10317,7 +10317,7 @@ class Nsp(Pfs0):
 						origheader=headerlist[i][1]
 						listedhash=headerlist[i][2]
 						break
-				message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType));print(message);feed+=message+'\n'
+				message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType._name_));print(message);feed+=message+'\n'
 				ncasize=ncz.header.size
 				t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
 				i=0

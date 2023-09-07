@@ -2,8 +2,12 @@ import os.path as path
 import re
 from binascii import hexlify as hx, unhexlify as uhx
 from pathlib import Path
-my_file = Path('keys.txt')
-my_file2 = Path('ztools\\keys.txt')	
+homeKeys = path.expanduser('~/.switch/prod.keys')
+keysFile0 = Path(homeKeys)
+keysFile1 = Path('keys.txt')
+keysFile2 = Path('ztools\\keys.txt')
+
+print()
 
 class Keys(dict):
 	def __init__(self, keys_type):
@@ -12,10 +16,12 @@ class Keys(dict):
 								=
 								\s*([a-fA-F0-9]*)\s* # key''', re.X)
 		try:
-			if my_file.is_file():
-				f = open('keys.txt', 'r')
-			if my_file2.is_file():
-				f = open('ztools\\keys.txt', 'r')
+			if keysFile0.is_file():
+				f = open(keysFile0, 'r')
+			if keysFile1.is_file():
+				f = open(keysFile1, 'r')
+			if keysFile2.is_file():
+				f = open(keysFile2, 'r')
 		except FileNotFoundError:
 			try:
 				f = open(path.join(path.dirname(path.abspath(__file__)), '%s' % self.keys_type), 'r')
@@ -34,7 +40,7 @@ class Keys(dict):
 
 class ProdKeys(Keys):
 	def __init__(self):
-		super(ProdKeys, self).__init__('keys.txt')
+		super(ProdKeys, self).__init__('prod')
 		if 'header_key' in self:
 			self['nca_header_key'] = self.pop('header_key')
 

@@ -92,6 +92,7 @@ if __name__ == '__main__':
 		parser.add_argument('-nscdb_new', '--addtodb_new', nargs='+', help='Adds content to database')
 		parser.add_argument('-v', '--verify', nargs='+', help='Verify nsp or xci file')
 		parser.add_argument('-vk', '--verify_key', nargs='+', help='Verify a key against a preorder nsp\nsx')
+		parser.add_argument('--saveverifylog', help='save to log...')
 		# CNMT Flag funtions
 		parser.add_argument('--set_cnmt_titleid', nargs='+', help='Changes cnmt.nca titleid')
 		parser.add_argument('--set_cnmt_version', nargs='+', help='Changes cnmt.nca version number')
@@ -7615,7 +7616,14 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to VERIFY hash of files')
 							print('Input "2" to NOT verify hash  of files\n')
-							ck=input('Input your answer: ')
+							if args.vertype and vertype == 'lv3':
+								ck="1"
+							elif args.vertype and vertype == 'lv2':
+								ck="2"
+							elif args.vertype and vertype == 'lv1':
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
 							if ck ==str(1):
 								print('')
 								f = Fs.Nsp(filename, 'rb')
@@ -7636,7 +7644,12 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to print to text file')
 							print('Input "2" to NOT print to text file\n')
-							ck=input('Input your answer: ')
+							if args.saveverifylog and args.saveverifylog == "1":
+								ck="1"
+							elif args.saveverifylog and args.saveverifylog == "2":
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
 							if ck ==str(1):
 								with open(infotext, 'w') as info:
 									info.write(feed)
@@ -7714,8 +7727,15 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to VERIFY hash of files')
 							print('Input "2" to NOT verify hash  of files\n')
-							check=input('Input your answer: ')
-							if check ==str(1):
+							if args.vertype and vertype == 'lv3':
+								ck="1"
+							elif args.vertype and vertype == 'lv2':
+								ck="2"
+							elif args.vertype and vertype == 'lv1':
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
+							if ck ==str(1):
 								print('')
 								f = Fs.factory(filename)
 								f.open(filename, 'rb')
@@ -7723,7 +7743,7 @@ if __name__ == '__main__':
 								f.flush()
 								f.close()
 								i=1
-							elif check ==str(2):
+							elif ck ==str(2):
 								f.flush()
 								f.close()
 								i=1
@@ -7736,12 +7756,17 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to print to text file')
 							print('Input "2" to NOT print to text file\n')
-							check=input('Input your answer: ')
-							if check ==str(1):
+							if args.saveverifylog and args.saveverifylog == "1":
+								ck="1"
+							elif args.saveverifylog and args.saveverifylog == "2":
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
+							if ck ==str(1):
 								with open(infotext, 'w') as info:
 									info.write(feed)
 								i=1
-							elif check ==str(2):
+							elif ck ==str(2):
 								i=1
 							else:
 								print('WRONG CHOICE\n')
@@ -7815,9 +7840,15 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to VERIFY hash of files')
 							print('Input "2" to NOT verify hash  of files\n')
-							ck=input('Input your answer: ')
+							if args.vertype and vertype == 'lv3':
+								ck="1"
+							elif args.vertype and vertype == 'lv2':
+								ck="2"
+							elif args.vertype and vertype == 'lv1':
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
 							if ck ==str(1):
-								print('')
 								f = Fs.Nsp(filename, 'rb')
 								verdict,feed=f.nsz_hasher(buffer,headerlist,verdict,feed)
 								f.flush()
@@ -7836,7 +7867,12 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to print to text file')
 							print('Input "2" to NOT print to text file\n')
-							ck=input('Input your answer: ')
+							if args.saveverifylog and args.saveverifylog == "1":
+								ck="1"
+							elif args.saveverifylog and args.saveverifylog == "2":
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
 							if ck ==str(1):
 								with open(infotext, 'w') as info:
 									info.write(feed)
@@ -7912,7 +7948,14 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to VERIFY hash of files')
 							print('Input "2" to NOT verify hash  of files\n')
-							ck=input('Input your answer: ')
+							if args.vertype and vertype == 'lv3':
+								ck="1"
+							elif args.vertype and vertype == 'lv2':
+								ck="2"
+							elif args.vertype and vertype == 'lv1':
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
 							if ck ==str(1):
 								print('')
 								f = Fs.Xci(filename)
@@ -7933,7 +7976,12 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to print to text file')
 							print('Input "2" to NOT print to text file\n')
-							ck=input('Input your answer: ')
+							if args.saveverifylog and args.saveverifylog == "1":
+								ck="1"
+							elif args.saveverifylog and args.saveverifylog == "2":
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
 							if ck ==str(1):
 								with open(infotext, 'w') as info:
 									info.write(feed)
@@ -8005,15 +8053,22 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to VERIFY hash of files')
 							print('Input "2" to NOT verify hash  of files\n')
-							check=input('Input your answer: ')
-							if check ==str(1):
+							if args.vertype and vertype == 'lv3':
+								ck="1"
+							elif args.vertype and vertype == 'lv2':
+								ck="2"
+							elif args.vertype and vertype == 'lv1':
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
+							if ck ==str(1):
 								print('')
 								f = Fs.Nca(filename, 'rb')
 								verdict,feed=f.verify_hash_nca(buffer,origheader,ver_,feed)
 								f.flush()
 								f.close()
 								i=1
-							elif check ==str(2):
+							elif ck ==str(2):
 								i=1
 							else:
 								print('WRONG CHOICE\n')
@@ -8024,12 +8079,17 @@ if __name__ == '__main__':
 						while i==0:
 							print('Input "1" to print to text file')
 							print('Input "2" to NOT print to text file\n')
-							check=input('Input your answer: ')
-							if check ==str(1):
+							if args.saveverifylog and args.saveverifylog == "1":
+								ck="1"
+							elif args.saveverifylog and args.saveverifylog == "2":
+								ck="2"
+							else:
+								ck=input('Input your answer: ')
+							if ck ==str(1):
 								with open(infotext, 'w') as info:
 									info.write(feed)
 								i=1
-							elif check ==str(2):
+							elif ck ==str(2):
 								i=1
 							else:
 								print('WRONG CHOICE\n')
