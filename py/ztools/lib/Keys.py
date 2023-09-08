@@ -4,7 +4,7 @@ from binascii import hexlify as hx, unhexlify as uhx
 import Print
 from pathlib import Path
 import sq_settings
-import os
+import os.path as path
 
 keys = {}
 titleKeks = []
