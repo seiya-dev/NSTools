@@ -8032,7 +8032,7 @@ class Xci(File):
 						if str(nspF._path)=="secure":
 							for f in nspF:
 								if str(f._path) == file:
-									message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+									message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 									for nf in f:
 										nf.rewind()
 										test=nf.read(0x4)
@@ -8047,11 +8047,11 @@ class Xci(File):
 						if str(nspF._path)=="secure":
 							for f in nspF:
 								if str(f._path) == file:
-									message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
-									if str(f.header.contentType) != 'Content.PROGRAM':
+									message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
+									if str(f.header.contentType._name_) != 'PROGRAM':
 										correct = self.verify_enforcer(file)
 										if correct == True:
-											if str(f.header.contentType) == 'Content.PUBLIC_DATA' and f.header.getRightsId() == 0:
+											if str(f.header.contentType._name_) == 'PUBLIC_DATA' and f.header.getRightsId() == 0:
 												correct = f.pr_noenc_check_dlc()
 												if correct == False:
 													baddec=True
@@ -8084,7 +8084,7 @@ class Xci(File):
 								if str(f._path)[:-1] == file[:-1]:
 									ncztype=Nca(f)
 									ncztype._path=f._path
-									message=(str(ncztype.header.titleId)+' - '+str(ncztype.header.contentType));print(message);feed+=message+'\n'
+									message=(str(ncztype.header.titleId)+' - '+str(ncztype.header.contentType._name_));print(message);feed+=message+'\n'
 									correct=self.verify_ncz(file)
 									break
 				elif file.endswith('.tik'):
@@ -8129,7 +8129,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.META':
+						if 	str(nca.header.contentType._name_) == 'META':
 							for f in nca:
 								for cnmt in f:
 									nca.rewind()
@@ -8233,7 +8233,7 @@ class Xci(File):
 				for f in nspF:
 					if type(f) == Nca and f.header.contentType != Type.Content.META:
 						hlisthash=False
-						message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+						message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 						verify,origheader,ncaname,feed,origkg,tr,tkey,iGC=f.verify(feed)
 						# headerlist.append([ncaname,origheader,hlisthash])
 						headerlist.append([ncaname,origheader,hlisthash,tr,tkey,iGC])
@@ -8245,7 +8245,7 @@ class Xci(File):
 						hlisthash=False
 						ncz=Nca(f)
 						ncz._path=f._path
-						message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType));print(message);feed+=message+'\n'
+						message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType._name_));print(message);feed+=message+'\n'
 						verify,origheader,ncaname,feed,origkg,tr,tkey,iGC=ncz.verify(feed)
 						# headerlist.append([ncaname,origheader,hlisthash])
 						headerlist.append([ncaname,origheader,hlisthash,tr,tkey,iGC])
@@ -8260,7 +8260,7 @@ class Xci(File):
 						hlisthash=False
 						meta_nca=f._path
 						f.rewind();meta_dat=f.read()
-						message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+						message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 						targetkg,minrsv=self.find_addecuatekg(meta_nca,keygenerationlist)
 						verify,origheader,ncaname,feed,origkg,tr,tkey,iGC=f.verify(feed)
 						if verify == False:
@@ -8373,7 +8373,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.META':
+						if 	str(nca.header.contentType._name_) == 'META':
 							if nca._path == ncameta:
 								for f in nca:
 									for cnmt in f:
@@ -8434,7 +8434,7 @@ class Xci(File):
 								origheader=headerlist[i][1]
 								listedhash=headerlist[i][2]
 								break
-						message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+						message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 						ncasize=f.header.size
 						t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
 						i=0
@@ -8675,7 +8675,7 @@ class Xci(File):
 										else:
 											return True
 
-								if fs.fsType == Type.Fs.ROMFS and fs.cryptoType == Type.Crypto.BKTR and str(f.header.contentType) == 'Content.PROGRAM':
+								if fs.fsType == Type.Fs.ROMFS and fs.cryptoType == Type.Crypto.BKTR and str(f.header.contentType._name_) == 'PROGRAM':
 									f.seek(0)
 									ncaHeader = NcaHeader()
 									ncaHeader.open(MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
@@ -8708,7 +8708,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							ctrl_list.append(nca._path)
 						else:
 							pass
@@ -8719,7 +8719,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							if item == False or nca._path == item:
 								check=nca.patch_netlicense()
 								return check
@@ -8729,7 +8729,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							if item == False or nca._path == item:
 								print('-------------------------------------------------')
 								print('Get Current IVFC level data:')
@@ -8742,7 +8742,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							if item == False or nca._path == item:
 								print('-------------------------------------------------')
 								print('Rebuild hashes for IVFC level '+str(j)+':')
@@ -8754,7 +8754,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							if item == False or nca._path == item:
 								print('-------------------------------------------------')
 								print('Rebuild IVFC superhash:')
@@ -8766,7 +8766,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							if item == False or nca._path == item:
 								print('-------------------------------------------------')
 								print('Rebuild nca hash-table:')
@@ -9280,7 +9280,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.META':
+						if 	str(nca.header.contentType._name_) == 'META':
 							if str(nca._path)==cnmtname:
 								crypto1=nca.header.getCryptoType()
 								crypto2=nca.header.getCryptoType2()
@@ -9395,7 +9395,7 @@ class Xci(File):
 			if str(nspF._path)=="secure":
 				for nca in nspF:
 					if type(nca) == Nca:
-						if 	str(nca.header.contentType) == 'Content.CONTROL':
+						if 	str(nca.header.contentType._name_) == 'CONTROL':
 							if target==str(nca._path):
 								offset=nca.get_nacp_offset()
 								for f in nca:
@@ -9773,7 +9773,9 @@ class Xci(File):
 			entry=files_list[i]
 			filepath=entry[0]
 			if filepath.endswith('.cnmt.nca'):
+				#print(filepath)
 				titleid,titleversion,base_ID,keygeneration,rightsId,RSV,RGV,ctype,metasdkversion,exesdkversion,hasHtmlManual,Installedsize,DeltaSize,ncadata=self.get_data_from_cnmt(filepath)
+				#print(titleid)
 				for j in range(len(ncadata)):
 					row=ncadata[j]
 					# print(row)
@@ -9860,7 +9862,7 @@ class Xci(File):
 								origheader=headerlist[i][1]
 								listedhash=headerlist[i][2]
 								break
-						message=(str(f.header.titleId)+' - '+str(f.header.contentType));print(message);feed+=message+'\n'
+						message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
 						ncasize=f.header.size
 						t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
 						i=0
@@ -9921,7 +9923,7 @@ class Xci(File):
 								origheader=headerlist[i][1]
 								listedhash=headerlist[i][2]
 								break
-						message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType));print(message);feed+=message+'\n'
+						message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType._name_));print(message);feed+=message+'\n'
 						ncasize=ncz.header.size
 						t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
 						i=0
