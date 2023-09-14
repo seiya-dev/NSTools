@@ -263,7 +263,7 @@ def getFWRangeKG(keygeneration):
 	if keygeneration == 15:
 		return "(15.0.0 - 15.0.1)"
 	if keygeneration == 16:
-		return "(>= 16.0.0)
+		return "(>= 16.0.0)"
 	else:
 		return "UNKNOWN"
 
