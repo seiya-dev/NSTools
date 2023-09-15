@@ -177,7 +177,6 @@ class Xci(File):
 			self.open(file)
 
 	def readHeader(self):
-
 		self.signature = self.read(0x100)
 		self.magic = self.read(0x4)
 		self.secureOffset = self.readInt32()
@@ -8113,6 +8112,8 @@ class Xci(File):
 					message=(tabs+file+tabs+'  -> is CORRECT');print(message);feed+=message+'\n'
 			elif correct=='ncz':
 				message=(tabs+file+tabs+'  -> ncz file needs HASH check');print(message);feed+=message+'\n'
+			elif correct=='ncz-block':
+				message=(tabs+file+tabs+'  -> zstd block compression not supported');print(message);feed+=message+'\n'
 			elif correct=='xcz':
 				pass
 			else:
@@ -9766,6 +9767,8 @@ class Xci(File):
 		files_list=sq_tools.ret_xci_offsets(self._path)
 		files=list();
 		fplist=list()
+		if len(files_list) == 0 and target.endswith('ncz'):
+			return 'ncz-block'
 		for k in range(len(files_list)):
 			entry=files_list[k]
 			fplist.append(entry[0])
@@ -9926,98 +9929,106 @@ class Xci(File):
 						message=(str(ncz.header.titleId)+' - '+str(ncz.header.contentType._name_));print(message);feed+=message+'\n'
 						ncasize=ncz.header.size
 						t = tqdm(total=ncasize, unit='B', unit_scale=True, leave=False)
-						i=0
-						f.rewind();
-						rawheader=f.read(0xC00)
-						f.rewind()
-						sha=sha256()
-						f.seek(0xC00)
-						sha.update(rawheader)
-						if origheader != False and listedhash == False:
-							sha0=sha256()
-							sha0.update(origheader)
-						i+=1
-						t.update(len(rawheader))
-						f.flush()
-						size=0x4000-0xC00
-						dif = f.read(size)
-						sha.update(dif)
-						if origheader != False and listedhash == False:
-							sha0.update(dif)
-						t.update(len(dif))
-						f.flush()
-						f.seek(0x4000)
-						magic = readInt64(f)
-						sectionCount = readInt64(f)
-						sections = []
-						for i in range(sectionCount):
-							sections.append(Section(f))
-						# print(sections)
-						count=0;checkstarter=0
-						dctx = zstandard.ZstdDecompressor()
-						reader = dctx.stream_reader(f)
-						c=0;spsize=0
-						for s in sections:
-							end = s.offset + s.size
-							if s.cryptoType == 1: #plain text
-								spsize+=s.size
+						try:
+							i=0
+							f.rewind();
+							rawheader=f.read(0xC00)
+							f.rewind()
+							sha=sha256()
+							f.seek(0xC00)
+							sha.update(rawheader)
+							if origheader != False and listedhash == False:
+								sha0=sha256()
+								sha0.update(origheader)
+							i+=1
+							t.update(len(rawheader))
+							f.flush()
+							size=0x4000-0xC00
+							dif = f.read(size)
+							sha.update(dif)
+							if origheader != False and listedhash == False:
+								sha0.update(dif)
+							t.update(len(dif))
+							f.flush()
+							f.seek(0x4000)
+							magic = readInt64(f)
+							sectionCount = readInt64(f)
+							sections = []
+							for i in range(sectionCount):
+								sections.append(Section(f))
+							# print(sections)
+							count=0;checkstarter=0
+							dctx = zstandard.ZstdDecompressor()
+							reader = dctx.stream_reader(f)
+							c=0;spsize=0
+							for s in sections:
 								end = s.offset + s.size
-								i = s.offset
-								while i < end:
-									chunkSz = buffer if end - i > buffer else end - i
-									chunk = reader.read(chunkSz)
-									if not len(chunk):
-										break
-									sha.update(chunk)
-									if origheader != False and listedhash == False:
-										sha0.update(chunk)
-									t.update(len(chunk))
-									i += chunkSz
-							elif s.cryptoType not in (3, 4):
-								raise IOError('Unknown crypto type: %d' % s.cryptoType)
-							else:
-								crypto = AESCTR(s.cryptoKey, s.cryptoCounter)
-								spsize+=s.size
-								test=int(spsize/(buffer))
-								i = s.offset
-								while i < end:
-									crypto.seek(i)
-									chunkSz = buffer if end - i > buffer else end - i
-									chunk = reader.read(chunkSz)
-									if not len(chunk):
-										break
-									crpt=crypto.encrypt(chunk)
-									sha.update(crpt)
-									if origheader != False and listedhash == False:
-										sha0.update(crpt)
-									t.update(len(chunk))
-									i += chunkSz
-						t.close()
-						sha=sha.hexdigest()
-						if listedhash != False:
-							sha0=listedhash
-						elif origheader != False:
-							sha0=sha0.hexdigest()
-						message=('  - File name: '+ncz._path);print(message);feed+=message+'\n'
-						message=('  - SHA256: '+sha);print(message);feed+=message+'\n'
-						if origheader != False:
-							message=('  - ORIG_SHA256: '+sha0);print(message);feed+=message+'\n'
-						if str(ncz._path)[:16] == str(sha)[:16]:
-							message=('   > FILE IS CORRECT');print(message);feed+=message+'\n'
-						elif origheader != False:
-							if str(ncz._path)[:16] == str(sha0)[:16]:
+								if s.cryptoType == 1: #plain text
+									spsize+=s.size
+									end = s.offset + s.size
+									i = s.offset
+									while i < end:
+										chunkSz = buffer if end - i > buffer else end - i
+										chunk = reader.read(chunkSz)
+										if not len(chunk):
+											break
+										sha.update(chunk)
+										if origheader != False and listedhash == False:
+											sha0.update(chunk)
+										t.update(len(chunk))
+										i += chunkSz
+								elif s.cryptoType not in (3, 4):
+									raise IOError('Unknown crypto type: %d' % s.cryptoType)
+								else:
+									crypto = AESCTR(s.cryptoKey, s.cryptoCounter)
+									spsize+=s.size
+									test=int(spsize/(buffer))
+									i = s.offset
+									while i < end:
+										crypto.seek(i)
+										chunkSz = buffer if end - i > buffer else end - i
+										chunk = reader.read(chunkSz)
+										if not len(chunk):
+											break
+										crpt=crypto.encrypt(chunk)
+										sha.update(crpt)
+										if origheader != False and listedhash == False:
+											sha0.update(crpt)
+										t.update(len(chunk))
+										i += chunkSz
+							t.close()
+							sha=sha.hexdigest()
+							if listedhash != False:
+								sha0=listedhash
+							elif origheader != False:
+								sha0=sha0.hexdigest()
+							message=('  - File name: '+ncz._path);print(message);feed+=message+'\n'
+							message=('  - SHA256: '+sha);print(message);feed+=message+'\n'
+							if origheader != False:
+								message=('  - ORIG_SHA256: '+sha0);print(message);feed+=message+'\n'
+							if str(ncz._path)[:16] == str(sha)[:16]:
 								message=('   > FILE IS CORRECT');print(message);feed+=message+'\n'
+							elif origheader != False:
+								if str(ncz._path)[:16] == str(sha0)[:16]:
+									message=('   > FILE IS CORRECT');print(message);feed+=message+'\n'
+								else:
+									message=('   > FILE IS CORRUPT');print(message);feed+=message+'\n'
+									verdict = False
+							elif  ncz.header.contentType == Type.Content.META and didverify == True:
+								message=('   > RSV WAS CHANGED');print(message);feed+=message+'\n'
+								#print('   > CHECKING INTERNAL HASHES')
+								message=('     * FILE IS CORRECT');print(message);feed+=message+'\n'
 							else:
 								message=('   > FILE IS CORRUPT');print(message);feed+=message+'\n'
 								verdict = False
-						elif  ncz.header.contentType == Type.Content.META and didverify == True:
-							message=('   > RSV WAS CHANGED');print(message);feed+=message+'\n'
-							#print('   > CHECKING INTERNAL HASHES')
-							message=('     * FILE IS CORRECT');print(message);feed+=message+'\n'
-						else:
-							message=('   > FILE IS CORRUPT');print(message);feed+=message+'\n'
+							message=('');print(message);feed+=message+'\n'
+						except:
+							t.close()
+							message=('  - File name: '+ncz._path);print(message);feed+=message+'\n'
+							message=('   > CANT CHECK FILE (ZSTD BLOCK COMPRESSION?)');print(message);feed+=message+'\n'
+							message=('');print(message);feed+=message+'\n'
 							verdict = False
-						message=('');print(message);feed+=message+'\n'
+							pass
 		if str(self.path).endswith('.xcz'):
 			token='XCZ'
 		elif str(self.path).endswith('.xci'):
