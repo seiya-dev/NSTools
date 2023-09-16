@@ -8488,7 +8488,7 @@ class Nsp(Pfs0):
 									if not certfile==pubcert:
 										cert_message=f"Warning {cert} doesn't follow normalized standard"
 									else:
-										cert_message=f"{cert}{tabs} -> is CORRECT"									
+										cert_message=f"{cert}{tabs} -> is CORRECT"
 					correct = checktik
 				else:
 					correct=False
@@ -8511,9 +8511,9 @@ class Nsp(Pfs0):
 						message=(tabs+'  * NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY');print(message);feed+=message+'\n'
 				elif file.endswith('tik') and not str(self._path).endswith('.nsz'):
 					message=(tabs+file+tabs+'  -> titlekey is INCORRECT <<<-');print(message);feed+=message+'\n'
-			# if cert_message!=False:		
-				# message=('Content.CERT');print(message);feed+=message+'\n'
-				# message=(tabs+cert_message);print(message);feed+=message+'\n'
+			if cert_message!=False:		
+				message=('Content.CERT');print(message);feed+=message+'\n'
+				message=(tabs+cert_message);print(message);feed+=message+'\n'
 		for nca in self:
 			if type(nca) == Nca:
 				if 	str(nca.header.contentType) == 'Content.META':
@@ -8898,7 +8898,6 @@ class Nsp(Pfs0):
 		return 	verdict,feed
 
 	def verify_enforcer(self,nca):
-
 		for f in self:
 			if str(f._path) == nca:
 				if type(f) == Fs.Nca and f.header.contentType == Type.Content.PROGRAM:
