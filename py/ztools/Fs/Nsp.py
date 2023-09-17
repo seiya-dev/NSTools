@@ -8424,11 +8424,10 @@ class Nsp(Pfs0):
 					for f in self:
 						if str(f._path) == file:
 							message=(str(f.header.titleId)+' - '+str(f.header.contentType._name_));print(message);feed+=message+'\n'
-
-							if str(f.header.contentType) != 'Content.PROGRAM':
+							if str(f.header.contentType._name_) != 'PROGRAM':
 								correct = self.verify_enforcer(file)
 								if correct == True:
-									if str(f.header.contentType) == 'Content.PUBLIC_DATA' and f.header.getRightsId() == 0:
+									if str(f.header.contentType._name_) == 'PUBLIC_DATA' and f.header.getRightsId() == 0:
 										correct = f.pr_noenc_check_dlc()
 										if correct == False:
 											baddec=True
@@ -8488,7 +8487,7 @@ class Nsp(Pfs0):
 									if not certfile==pubcert:
 										cert_message=f"Warning {cert} doesn't follow normalized standard"
 									else:
-										cert_message=f"{cert}{tabs} -> is CORRECT"
+										cert_message=f"{cert}{tabs}  -> is CORRECT"
 					correct = checktik
 				else:
 					correct=False
@@ -8512,11 +8511,11 @@ class Nsp(Pfs0):
 				elif file.endswith('tik') and not str(self._path).endswith('.nsz'):
 					message=(tabs+file+tabs+'  -> titlekey is INCORRECT <<<-');print(message);feed+=message+'\n'
 			if cert_message!=False:		
-				message=('Content.CERT');print(message);feed+=message+'\n'
+				message=('Content.CERTIFICATE');print(message);feed+=message+'\n'
 				message=(tabs+cert_message);print(message);feed+=message+'\n'
 		for nca in self:
 			if type(nca) == Nca:
-				if 	str(nca.header.contentType) == 'Content.META':
+				if 	str(nca.header.contentType._name_) == 'META':
 					for f in nca:
 						for cnmt in f:
 							nca.rewind()
