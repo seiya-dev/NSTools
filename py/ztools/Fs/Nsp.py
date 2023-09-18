@@ -8483,11 +8483,14 @@ class Nsp(Pfs0):
 								from Fs.Ticket import PublicCert
 								pcert=PublicCert()
 								pubcert=pcert.generate()
-								if not certfile==pubcert:
-									cert_message=f"{cert}{tabs}  -> exists"
-									# cert_message=f"{cert}{tabs}  -> Warning: doesn't follow normalized standard"
+								pubcertDBI=pcert.generateDBI()
+								if certfile==pubcert:
+									cert_message=f"{cert}{tabs}  -> is CORRECT (Tinfoil)"
+								elif certfile==pubcertDBI:
+									cert_message=f"{cert}{tabs}  -> is CORRECT (DBI)"
 								else:
-									cert_message=f"{cert}{tabs}  -> is CORRECT"
+									# cert_message=f"{cert}{tabs}  -> Warning: doesn't follow normalized standard"
+									cert_message=f"{cert}{tabs}  -> exists"
 					correct = checktik
 				else:
 					correct=False
@@ -8512,7 +8515,7 @@ class Nsp(Pfs0):
 						message=(tabs+'  * NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY');print(message);feed+=message+'\n'
 				elif file.endswith('tik') and not str(self._path).endswith('.nsz'):
 					message=(tabs+file+tabs+'  -> titlekey is INCORRECT <<<-');print(message);feed+=message+'\n'
-			if cert_message!=False:		
+			if cert_message!=False:
 				message=('Content.CERTIFICATE');print(message);feed+=message+'\n'
 				message=(tabs+cert_message);print(message);feed+=message+'\n'
 		for nca in self:
