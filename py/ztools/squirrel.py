@@ -2804,7 +2804,7 @@ if __name__ == '__main__':
 
 		# parser.add_argument('-dcpr', '--decompress', help='deCompress a nsz, xcz or ncz')
 		if args.decompress:
-			if args.ofolder:		
+			if args.ofolder:
 				for input in args.ofolder:
 					try:
 						ofolder = input
@@ -2822,10 +2822,8 @@ if __name__ == '__main__':
 						filepath = filelist.readline()
 						filepath=os.path.abspath(filepath.rstrip('\n'))	
 				else:
-					for inpt in args.decompress:
-						filepath=inpt
-						break
-				if filepath.endswith(".nsz"):	
+					filepath = args.decompress
+				if filepath.endswith(".nsz"):
 					import decompressor	
 					basename=os.path.basename(os.path.abspath(filepath))
 					endname=basename[:-1]+'p'
