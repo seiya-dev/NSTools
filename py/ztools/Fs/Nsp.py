@@ -8471,29 +8471,23 @@ class Nsp(Pfs0):
 								if 	checktik == True:
 									break
 					if checktik==False and str(self._path).endswith('.nsz'):
-						message=('Content.TICKET');print(message);feed+=message+'\n'
-						cert=file[:-3]+'cert'
-						if not cert in listed_certs:
-							cert_message=f"{cert}{tabs}  -> Warning: is MISSING"
-						else:
-							cert_message=f"{cert}{tabs}  -> exists"
 						checktik='nsz'
+					message=('Content.TICKET');print(message);feed+=message+'\n'
+					cert=file[:-3]+'cert'
+					if not cert in listed_certs:
+						cert_message=f"{cert}{tabs}  -> Warning: is MISSING"
 					else:
-						message=('Content.TICKET');print(message);feed+=message+'\n'
-						cert=file[:-3]+'cert'
-						if not cert in listed_certs:
-							cert_message=f"{cert}{tabs}  -> Warning: is MISSING"
-						else:
-							for f in self:
-								if  f._path==cert:
-									certfile=f.read()
-									from Fs.Ticket import PublicCert
-									pcert=PublicCert()
-									pubcert=pcert.generate()
-									if not certfile==pubcert:
-										cert_message=f"{cert}{tabs}  -> Warning: doesn't follow normalized standard"
-									else:
-										cert_message=f"{cert}{tabs}  -> is CORRECT"
+						for f in self:
+							if  f._path==cert:
+								certfile=f.read()
+								from Fs.Ticket import PublicCert
+								pcert=PublicCert()
+								pubcert=pcert.generate()
+								if not certfile==pubcert:
+									cert_message=f"{cert}{tabs}  -> exists"
+									# cert_message=f"{cert}{tabs}  -> Warning: doesn't follow normalized standard"
+								else:
+									cert_message=f"{cert}{tabs}  -> is CORRECT"
 					correct = checktik
 				else:
 					correct=False
