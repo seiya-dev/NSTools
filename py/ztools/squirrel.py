@@ -7594,7 +7594,7 @@ if __name__ == '__main__':
 				for filename in args.verify:
 					filename=filename
 			basename=str(os.path.basename(os.path.abspath(filename)))
-			ofile=basename[:-4]+'-verify.txt'
+			ofile=basename[:-4]+ '-' + basename[-3:] + '-verify.txt'
 			infotext=os.path.join(ofolder, ofile)
 			if filename.endswith('.nsp') or filename.endswith('.nsx'):
 				try:
