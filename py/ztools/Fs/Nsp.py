@@ -8471,12 +8471,18 @@ class Nsp(Pfs0):
 								if 	checktik == True:
 									break
 					if checktik==False and str(self._path).endswith('.nsz'):
+						message=('Content.TICKET');print(message);feed+=message+'\n'
+						cert=file[:-3]+'cert'
+						if not cert in listed_certs:
+							cert_message=f"{cert}{tabs}  -> Warning: is MISSING"
+						else:
+							cert_message=f"{cert}{tabs}  -> exists"
 						checktik='nsz'
 					else:
 						message=('Content.TICKET');print(message);feed+=message+'\n'
 						cert=file[:-3]+'cert'
 						if not cert in listed_certs:
-							cert_message=f"Warning {cert}{tabs} -> is MISSING"
+							cert_message=f"{cert}{tabs}  -> Warning: is MISSING"
 						else:
 							for f in self:
 								if  f._path==cert:
@@ -8485,7 +8491,7 @@ class Nsp(Pfs0):
 									pcert=PublicCert()
 									pubcert=pcert.generate()
 									if not certfile==pubcert:
-										cert_message=f"Warning {cert} doesn't follow normalized standard"
+										cert_message=f"{cert}{tabs}  -> Warning: doesn't follow normalized standard"
 									else:
 										cert_message=f"{cert}{tabs}  -> is CORRECT"
 					correct = checktik
@@ -8499,6 +8505,8 @@ class Nsp(Pfs0):
 			elif correct=='ncz':
 				message=(tabs+file+tabs+'  -> ncz file needs HASH check');print(message);feed+=message+'\n'
 			elif correct=='nsz':
+				if file.endswith('.tik'):
+					message=(tabs+file+tabs+'  -> exists');print(message);feed+=message+'\n'
 				pass
 			else:
 				verdict=False
