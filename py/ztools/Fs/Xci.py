@@ -8115,7 +8115,7 @@ class Xci(File):
 			elif correct=='ncz':
 				message=(tabs+file+tabs+'  -> ncz file needs HASH check');print(message);feed+=message+'\n'
 			elif correct=='ncz-block':
-				message=(tabs+file+tabs+'  -> zstd block compression not supported');print(message);feed+=message+'\n'
+				message=(tabs+file+tabs+'  -> ncz file needs HASH check (zstd block compression)');print(message);feed+=message+'\n'
 			elif correct=='xcz':
 				pass
 			else:

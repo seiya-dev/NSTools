@@ -8825,6 +8825,7 @@ class Nsp(Pfs0):
 		for f in self:
 			if type(f) == Nca:
 				origheader=False
+				listedhash=False
 				for i in range(len(headerlist)):
 					if str(f._path)==headerlist[i][0]:
 						origheader=headerlist[i][1]
@@ -10254,6 +10255,7 @@ class Nsp(Pfs0):
 		for f in self:
 			if type(f) == Nca:
 				origheader=False
+				listedhash=False
 				for i in range(len(headerlist)):
 					if str(f._path)==headerlist[i][0]:
 						origheader=headerlist[i][1]
@@ -10315,6 +10317,7 @@ class Nsp(Pfs0):
 				ncz=Nca(f)
 				ncz._path=f._path
 				origheader=False
+				listedhash=False
 				for i in range(len(headerlist)):
 					if str(f._path)==headerlist[i][0]:
 						origheader=headerlist[i][1]
