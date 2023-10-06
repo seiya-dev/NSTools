@@ -113,7 +113,11 @@ def scan_folder():
                 with open(lpath_badfolder, 'a') as f:
                     f.write(f'{item}\n')
         
-        send_hook(f'[:INFO:] Verifying...\n')
+        dlc_num = ''
+        if title_type == 'DLC':
+            dlc_num = f'{str(int(title_ext, 16)).zfill(4)}'
+        
+        send_hook(f'[:INFO:] Verifying... {item.upper()[-3:]} {title_id} v{round(int(version)/65536)} {title_type} {dlc_num}\n')
         # print(title_id, round(int(version)/65536), title_type, item.upper()[-3:], item)
         
         try:
@@ -131,3 +135,4 @@ if __name__ == "__main__":
         scan_folder()
     else: 
         parser.print_help()
+    print()
