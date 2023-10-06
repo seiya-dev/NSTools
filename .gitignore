@@ -21,6 +21,7 @@
 *.cs
 *.chm
 *.csv
+*.log
 py/zconfig/*.json
 py/ztools/*.exe
 py/zconfig/*.pem
