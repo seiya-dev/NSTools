@@ -67,16 +67,35 @@ def verify(file):
 
 def decrypt_verify(self):
     listed_files=list()
-    listed_certs=list()
     valid_files=list()
+    listed_certs=list()
+    
+    if type(self) != Fs.Xci.Xci and type(self) != Fs.Nsp.Nsp:
+        return False, {}
     
     print('[:INFO:] DECRYPTION TEST')
+    temp_hfs = self
     
     if(type(self) == Fs.Xci.Xci):
         for nspf in self.hfs0:
             if nspf._path == 'secure':
-                for file in nspf:
-                    print(file._path)
-    if(type(self) == Fs.Nsp.Nsp):
-        for nspf in self:
-            print(nspf._path)
+                temp_hfs = nspf
+    
+    for file in temp_hfs:
+        if file._path.endswith('.nca'):
+            listed_files.append(file._path)
+        if type(file) == Fs.Nca.Nca:
+            valid_files.append(file._path)
+        if file._path.endswith('.ncz'):
+            listed_files.append(file._path)
+            valid_files.append(file._path)
+        if file._path.endswith('.tik'):
+            listed_files.append(file._path)
+        if type(file) == Fs.Ticket.Ticket:
+            valid_files.append(file._path)
+        if file._path.endswith('.cert'):
+            listed_certs.append(file._path)
+    
+    print(listed_files)
+    print(valid_files)
+    print(listed_certs)
