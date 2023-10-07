@@ -10,31 +10,28 @@ from Fs.Pfs0 import Pfs0
 from Fs.Hfs0 import Hfs0
 from Fs.Ticket import Ticket
 from Fs.File import File
-from Fs.ChromeNsp import ChromeNsp
-from Fs.ChromeXci import ChromeXci
-from Fs.ChromeNacp import ChromeNacp
 
 def factory(name):
 	if name.endswith('.xci'):
 		f = Xci()
 	elif name.endswith('.xcz'):
-		f = Xci()		
+		f = Xci()
 	elif name.endswith('.nsp'):
 		f = Nsp()
 	elif name.endswith('.nsz'):
-		f = Nsp()		
+		f = Nsp()
 	elif name.endswith('.nsx'):
 		f = Nsp()
 	elif name.endswith('.nca'):
 		f =  Nca()
 	elif name.endswith('.ncz'):
-		f =  File()		
+		f =  File()
 	elif name.endswith('.nacp'):
 		f =  Nacp()
 	elif name.endswith('.tik'):
 		f =  Ticket()
 	elif name.endswith('.hfs0'):
-		f =  Hfs0()		
+		f =  Hfs0()
 	else:
 		f = File()
 	return f

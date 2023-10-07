@@ -13,7 +13,7 @@ from Fs.Nacp import Nacp
 import os
 import Print
 
-from Fs import Header, BlockDecompressorReader
+from ZstdBlock import Header, BlockDecompressorReader
 
 import Keys
 import aes128
