@@ -2,7 +2,6 @@ urllib3
 unidecode
 tqdm
 bs4
-tqdm
 requests
 image
 pywin32
@@ -10,7 +9,6 @@ pycryptodome
 pykakasi
 googletrans
 chardet
-eel
 bottle
 zstandard
 colorama

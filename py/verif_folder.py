@@ -62,33 +62,10 @@ def scan_folder():
         
         send_hook(f'\n[:INFO:] File found: {item}')
         send_hook(f'[:INFO:] Checking syntax...')
-        res = re.search(r'(?P<title_id>\[[A-F0-9]{16}\])( )?(?P<version>\[v\d+\])(.*)?(?P<type>\[(BASE|UPD(ATE)?|DLC( \d+)?)\])?(.*)?\.(xci|xcz|nsp|nsz)$', item, re.I)
         
-        if res is None:
-            with open(lpath_badname, 'a') as f:
-                f.write(f'{item}\n')
-            continue
+        data = verif.parse_name(item)
         
-        title_id = res.group('title_id')[1:-1]
-        version = res.group('version')[2:-1]
-        title_type = None
-        
-        title_oei = int(res.group('title_id')[13:-4], 16)
-        title_ext = res.group('title_id')[14:-1]
-        
-        if title_oei % 2 == 0 and title_ext == '000':
-            title_type = 'BASE'
-        elif title_oei % 2 == 0 and title_ext == '800':
-            title_type = 'UPD'
-        elif title_oei % 2 == 1 and int(title_ext, 16) > 0:
-            title_type = 'DLC'
-        
-        if int(version)%65536 != 0:
-            with open(lpath_badname, 'a') as f:
-                f.write(f'{item}\n')
-            continue
-        
-        if title_type is None:
+        if data is None:
             with open(lpath_badname, 'a') as f:
                 f.write(f'{item}\n')
             continue
@@ -100,25 +77,25 @@ def scan_folder():
                 iscart = False
             if fname == 'UPDATE':
                 fname = 'UPD'
-            if fname == 'BASE' and title_type != 'BASE' or fname == 'BASE' and iscart == True:
+            if fname == 'BASE' and data['title_type'] != 'BASE' or fname == 'BASE' and iscart == True:
                 with open(lpath_badfolder, 'a') as f:
                     f.write(f'{item}\n')
-            if fname == 'UPD' and title_type != 'UPD' or fname == 'UPD' and iscart == True:
+            if fname == 'UPD' and data['title_type'] != 'UPD' or fname == 'UPD' and iscart == True:
                 with open(lpath_badfolder, 'a') as f:
                     f.write(f'{item}\n')
-            if fname == 'DLC' and title_type != 'DLC' or fname == 'DLC' and iscart == True:
+            if fname == 'DLC' and data['title_type'] != 'DLC' or fname == 'DLC' and iscart == True:
                 with open(lpath_badfolder, 'a') as f:
                     f.write(f'{item}\n')
             if fname == 'XCI' and iscart == False:
                 with open(lpath_badfolder, 'a') as f:
                     f.write(f'{item}\n')
         
-        dlc_num = ''
-        if title_type == 'DLC':
-            dlc_num = f'{str(int(title_ext, 16)).zfill(4)}'
+        log_info = f"{item.upper()[-3:]} {data['title_id']} v{round(data['version']/65536)} {data['title_type']}"
         
-        send_hook(f'[:INFO:] Verifying... {item.upper()[-3:]} {title_id} v{round(int(version)/65536)} {title_type} {dlc_num}\n')
-        # print(title_id, round(int(version)/65536), title_type, item.upper()[-3:], item)
+        if data['title_type'] == 'DLC':
+            log_info += f" {str(int(data['title_ext'], 16)).zfill(4)}"
+        
+        send_hook(f'[:INFO:] Verifying... {log_info}\n')
         
         try:
             if not verif.verify(item_path):
