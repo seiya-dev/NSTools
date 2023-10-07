@@ -70,8 +70,11 @@ def decrypt_verify(self):
     valid_files=list()
     listed_certs=list()
     
+    verdict = True
+    vmsg = ''
+    
     if type(self) != Fs.Xci.Xci and type(self) != Fs.Nsp.Nsp:
-        return False, {}
+        return False, msg
     
     print('[:INFO:] DECRYPTION TEST')
     temp_hfs = self
@@ -96,6 +99,73 @@ def decrypt_verify(self):
         if file._path.endswith('.cert'):
             listed_certs.append(file._path)
     
-    print(listed_files)
-    print(valid_files)
-    print(listed_certs)
+    for file in listed_files:
+        correct = False
+        baddec = False
+        cert_message = False
+        
+        if file in valid_files:
+            if file.endswith('cnmt.nca'):
+                for f in temp_hfs:
+                    if f._path == file:
+                        tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
+                        vmsg += tvmsg
+                        print(tvmsg)
+                        for nf in f:
+                            nf.rewind()
+                            test = nf.read(0x4)
+                            if test == b'PFS0':
+                                correct = True
+                                break
+                        if correct == True:
+                            correct = verify_enforcer(f, file)
+            elif file.endswith('.nca'):
+                for f in temp_hfs:
+                    if f._path == file:
+                        tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
+                        vmsg += tvmsg
+                        print(tvmsg)
+                        if f.header.contentType != Fs.Type.Content.PROGRAM:
+                            correct = verify_enforcer(f, file)
+                            # if correct == True:
+                            #     if f.header.contentType == Fs.Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
+                            #         pr_noenc_check_dlc()
+        
+        if correct == True:
+            if file.endswith('cnmt.nca'):
+                tvmsg = f'> {file}\t -> is CORRECT'
+                vmsg += tvmsg
+                print(tvmsg)
+            else:
+                tvmsg = f'> {file}\t\t -> is CORRECT'
+                vmsg += tvmsg
+                print(tvmsg)
+        else:
+            verdict = False
+
+def verify_enforcer(f, file):
+    if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.META:
+        for fs in f.sectionFilesystems:
+            if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
+                f.seek(0)
+                ncaHeader = f.read(0x400)
+                sectionHeaderBlock = fs.buffer
+                f.seek(fs.offset)
+                pfs0Header = f.read(0x10)
+                return True
+            else:
+                return False
+    if type(f) == Fs.Nca.Nca:
+        for fs in f.sectionFilesystems:
+            if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.CTR or f.header.contentType == Fs.Type.Content.MANUAL or f.header.contentType == Fs.Type.Content.DATA:
+                f.seek(0)
+                ncaHeader = f.read(0x400)
+                sectionHeaderBlock = fs.buffer
+                levelOffset = int.from_bytes(sectionHeaderBlock[0x18:0x20], byteorder='little', signed=False)
+                levelSize = int.from_bytes(sectionHeaderBlock[0x20:0x28], byteorder='little', signed=False)
+                offset = fs.offset + levelOffset
+                f.seek(offset)
+                pfs0Header = f.read(levelSize)
+                return True
+            else:
+                return False
