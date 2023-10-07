@@ -12,8 +12,8 @@ srcPath = os.path.dirname(os.path.abspath(__file__))
 
 keysFiles = [
 	Path(os.path.join(homePath, 'prod.keys')),
-	Path(os.path.join(srcPath, '../prod.keys')),
-	Path(os.path.join(srcPath, '../keys.txt')),
+	Path(os.path.join(srcPath, '..', 'prod.keys')),
+	Path(os.path.join(srcPath, '..', 'keys.txt')),
 ]
 
 class Keys(dict):

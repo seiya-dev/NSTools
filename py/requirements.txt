@@ -17,3 +17,4 @@ google-auth-oauthlib
 windows-curses
 oauth2client
 comtypes
+enlighten
