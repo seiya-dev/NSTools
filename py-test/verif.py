@@ -144,6 +144,19 @@ def decrypt_verify(self):
             verdict = False
 
 def verify_enforcer(f, file):
+    if type(f) == Fs.Nca and f.header.contentType == Fs.Type.Content.PROGRAM:
+        for fs in f.sectionFilesystems:
+            if fs.fsType == Type.Fs.PFS0 and fs.cryptoType == Type.Crypto.CTR:
+                f.seek(0)
+                ncaHeader = f.read(0x400)
+
+                sectionHeaderBlock = fs.buffer
+
+                f.seek(fs.offset)
+                pfs0Header = f.read(0x10)
+                return True
+            else:
+                return False
     if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.META:
         for fs in f.sectionFilesystems:
             if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
