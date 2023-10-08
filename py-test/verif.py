@@ -4,9 +4,8 @@ import os
 import sys
 import re
 
-from pathlib import Path
-
 import Fs
+from lib import VerifyTools
 
 def parse_name(file):
     res = re.search(r'(?P<title_id>\[[A-F0-9]{16}\])( )?(?P<version>\[v\d+\])(.*)?(?P<type>\[(BASE|UPD(ATE)?|DLC( \d+)?)\])?(.*)?\.(xci|xcz|nsp|nsz)$', file, re.I)
@@ -103,7 +102,7 @@ def decrypt_verify(self):
     for file in listed_files:
         correct = False
         bad_dec = False
-        cert_message = False
+        cert_message = ''
         
         if file in valid_files:
             if file.endswith('cnmt.nca'):
@@ -119,7 +118,7 @@ def decrypt_verify(self):
                                 correct = True
                                 break
                         if correct == True:
-                            correct = verify_enforcer(f)
+                            correct = VerifyTools.verify_enforcer(f)
             elif file.endswith('.nca'):
                 for f in temp_hfs:
                     if f._path == file:
@@ -127,10 +126,10 @@ def decrypt_verify(self):
                         vmsg += tvmsg
                         print(tvmsg)
                         if f.header.contentType != Fs.Type.Content.PROGRAM:
-                            correct = verify_enforcer(f)
+                            correct = VerifyTools.verify_enforcer(f)
                             if correct == True:
                                 if f.header.contentType == Fs.Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
-                                    correct = pr_noenc_check_dlc(f)
+                                    correct = VerifyTools.pr_noenc_check_dlc(f)
                                     if correct == False:
                                         bad_dec = True
                         else:
@@ -146,13 +145,13 @@ def decrypt_verify(self):
                                     pass
                                 f.rewind()
                             if correct == True:
-                                correct = verify_enforcer(f)
+                                correct = VerifyTools.verify_enforcer(f)
                             if correct == False and f.header.getRightsId() == 0:
-                                correct = pr_noenc_check(temp_hfs, file)
+                                correct = VerifyTools.pr_noenc_check(temp_hfs, file)
                             if correct == False and f.header.getRightsId() != 0:
-                                correct = verify_nca_key(temp_hfs, file)
+                                correct = VerifyTools.verify_nca_key(temp_hfs, file)
                             if correct == True and f.header.getRightsId() == 0:
-                                correct = pr_noenc_check(temp_hfs, file)
+                                correct = VerifyTools.pr_noenc_check(temp_hfs, file)
                                 if correct == False:
                                     bad_dec = True
             elif file.endswith('.ncz'):
@@ -164,7 +163,37 @@ def decrypt_verify(self):
                         print(tvmsg)
                         # correct = self.verify_ncz(file)
                         break
-            
+            elif file.endswith('.tik'):
+                tvmsg = f'\n:{file[:16].upper()} - Content.TICKET'
+                vmsg += tvmsg
+                print(tvmsg)
+                
+                check_tik = False
+                
+                for f in temp_hfs:
+                    if f._path.endswith('.nca'):
+                        if check_tik == False and f.header.getRightsId() != 0:
+                            print('[:WARN:] Not implemented')
+                            break
+                    if f._path.endswith('.ncz'):
+                        tncz = Fs.Nca.Nca(f)
+                        if check_tik == False and tncz.header.getRightsId() != 0:
+                            check_tik = 'ncz'
+                            break
+                
+                if not f'{file[:-3]}cert' in listed_certs:
+                    cert_message += f'\n:{file[:16].upper()} - Content.CERTIFICATE'
+                    cert_message += f'> {file[:-3]}cert\t\t  -> is MISSING'
+                if len(listed_certs) > 0:
+                    for f in temp_hfs:
+                        if f._path.endswith('.cert'):
+                            cert_message += f'\n:{f._path[:16].upper()} - Content.CERTIFICATE'
+                            cert_message += f'\n> {f._path}\t\t -> not TESTED'
+                            break
+                correct = check_tik
+            else:
+                correct = False
+        
         if correct == True:
             if file.endswith('cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRECT'
@@ -200,126 +229,5 @@ def decrypt_verify(self):
                 tvmsg = f'> {file}\t\t -> is INCORRECT <<<-'
                 vmsg += tvmsg
                 print(tvmsg)
-
-def verify_nca_key(self, nca):
-    print('[:WARN:] NOT IMPLEMENTED!')
-    return False
-    """
-    check=False;titleKey=0
-    for file in self:
-        if (file._path).endswith('.tik'):
-            titleKey = file.getTitleKeyBlock().to_bytes(16, byteorder='big')
-            check=self.verify_key(nca,str(file._path))
-            if check==True:
-                break
-    return check, titleKey
-    """
-
-def verify_enforcer(f):
-    if type(f) == Fs.Nca and f.header.contentType == Fs.Type.Content.PROGRAM:
-        for fs in f.sectionFilesystems:
-            if fs.fsType == Type.Fs.PFS0 and fs.cryptoType == Type.Crypto.CTR:
-                f.seek(0)
-                ncaHeader = f.read(0x400)
-                sectionHeaderBlock = fs.buffer
-                f.seek(fs.offset)
-                pfs0Header = f.read(0x10)
-                return True
-            else:
-                return False
-    if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.META:
-        for fs in f.sectionFilesystems:
-            if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
-                f.seek(0)
-                ncaHeader = f.read(0x400)
-                sectionHeaderBlock = fs.buffer
-                f.seek(fs.offset)
-                pfs0Header = f.read(0x10)
-                return True
-            else:
-                return False
-    if type(f) == Fs.Nca.Nca:
-        for fs in f.sectionFilesystems:
-            if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.CTR or f.header.contentType == Fs.Type.Content.MANUAL or f.header.contentType == Fs.Type.Content.DATA:
-                f.seek(0)
-                ncaHeader = f.read(0x400)
-                sectionHeaderBlock = fs.buffer
-                levelOffset = int.from_bytes(sectionHeaderBlock[0x18:0x20], byteorder='little', signed=False)
-                levelSize = int.from_bytes(sectionHeaderBlock[0x20:0x28], byteorder='little', signed=False)
-                offset = fs.offset + levelOffset
-                f.seek(offset)
-                pfs0Header = f.read(levelSize)
-                return True
-            else:
-                return False
-
-def pr_noenc_check(self, file = None, mode = 'rb'):
-    print('[:WARN:] NOT IMPLEMENTED!')
-    return False
-    """
-    indent = 1
-    tabs = '\t' * indent
-    check = False
-    for f in self:
-        cryptoType=f.get_cryptoType()
-        cryptoKey=f.get_cryptoKey()
-        cryptoCounter=f.get_cryptoCounter()
-        super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
-        for g in f:
-            if type(g) == File:
-                if (str(g._path)) == 'main.npdm':
-                    check = True
-                    break
-        if check==False:
-            for f in self:
-                if f.fsType == Type.Fs.ROMFS and f.cryptoType == Type.Crypto.CTR:
-                    if f.magic==b'IVFC':
-                        check=True
-    return check
-    """
-
-def pr_noenc_check_dlc(self):
-    print('[:WARN:] NOT IMPLEMENTED!')
-    return False
-    """
-    crypto1=self.header.getCryptoType()
-    crypto2=self.header.getCryptoType2()
-    if crypto1 == 2:
-        if crypto1 > crypto2:
-            masterKeyRev=crypto1
-        else:
-            masterKeyRev=crypto2
-    else:
-        masterKeyRev=crypto2
-    decKey = Keys.decryptTitleKey(self.header.titleKeyDec, Keys.getMasterKeyIndex(masterKeyRev))
-    for f in self.sectionFilesystems:
-        #print(f.fsType);print(f.cryptoType)
-        if f.fsType == Type.Fs.ROMFS and f.cryptoType == Type.Crypto.CTR:
-            ncaHeader = NcaHeader()
-            self.header.rewind()
-            ncaHeader = self.header.read(0x400)
-            #Hex.dump(ncaHeader)
-            pfs0=f
-            #Hex.dump(pfs0.read())
-            sectionHeaderBlock = f.buffer
-    
-            levelOffset = int.from_bytes(sectionHeaderBlock[0x18:0x20], byteorder='little', signed=False)
-            levelSize = int.from_bytes(sectionHeaderBlock[0x20:0x28], byteorder='little', signed=False)
-    
-            pfs0Header = pfs0.read(levelSize)
-            if sectionHeaderBlock[8:12] == b'IVFC':
-                data = pfs0Header;
-                #Hex.dump(pfs0Header)
-                if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
-                    return True
-                else:
-                    return False
-            else:
-                data = pfs0Header;
-                #Hex.dump(pfs0Header)
-                magic = pfs0Header[0:4]
-                if magic != b'PFS0':
-                    return False
-                else:
-                    return True
-    """
+        if cert_message:
+            print(cert_message)
