@@ -39,8 +39,8 @@ class Nsp(Pfs0):
 			#if files:
 			#	self.pack(files)
 				
-		if self.titleId and self.isUnlockable():
-			Print.info('unlockable title found ' + self.path)
+		#if self.titleId and self.isUnlockable():
+		#	Print.info('unlockable title found ' + self.path)
 		#	self.unlock()
 
 	def getFileSize(self):
