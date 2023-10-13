@@ -1,4 +1,9 @@
+from binascii import hexlify as hx, unhexlify as uhx
+
 import Fs
+import io
+
+from lib import FsTools
 
 def verify_nca_key(self, nca):
     print('[:WARN:] NOT IMPLEMENTED!')
@@ -51,6 +56,15 @@ def verify_enforcer(f):
                 return True
             else:
                 return False
+
+def verify_ncz(self, target):
+    for f in self:
+        if f._path.endswith('.cnmt.nca'):
+            cnmtData = FsTools.get_data_from_cnmt(f)
+    
+    
+    # end
+    return False
 
 def pr_noenc_check(self, file = None, mode = 'rb'):
     print('[:WARN:] NOT IMPLEMENTED!')

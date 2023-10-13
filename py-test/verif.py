@@ -65,7 +65,7 @@ def verify(file):
     except BaseException as e:
         raise e
 
-def decrypt_verify(self):
+def decrypt_verify(nspx):
     listed_files=list()
     valid_files=list()
     listed_certs=list()
@@ -73,31 +73,38 @@ def decrypt_verify(self):
     verdict = True
     vmsg = ''
     
-    if type(self) != Fs.Xci.Xci and type(self) != Fs.Nsp.Nsp:
+    if type(nspx) != Fs.Xci.Xci and type(nspx) != Fs.Nsp.Nsp:
         return False, msg
     
     print('[:INFO:] DECRYPTION TEST')
-    temp_hfs = self
+    temp_hfs = nspx
+    isCard = False
     
-    if(type(self) == Fs.Xci.Xci):
-        for nspf in self.hfs0:
+    if(type(nspx) == Fs.Xci.Xci):
+        for nspf in nspx.hfs0:
             if nspf._path == 'secure':
                 temp_hfs = nspf
+                isCard = True
     
     for file in temp_hfs:
-        if file._path.endswith('.nca'):
+        if file._path.endswith(('.nca','.ncz','.tik')):
             listed_files.append(file._path)
         if type(file) == Fs.Nca.Nca:
             valid_files.append(file._path)
         if file._path.endswith('.ncz'):
-            listed_files.append(file._path)
             valid_files.append(file._path)
-        if file._path.endswith('.tik'):
-            listed_files.append(file._path)
         if type(file) == Fs.Ticket.Ticket:
             valid_files.append(file._path)
         if file._path.endswith('.cert'):
             listed_certs.append(file._path)
+    
+    for file in temp_hfs:
+        if not file._path.endswith(('.nca','.ncz','.tik','.cert')):
+            tvmsg = ''
+            tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
+            tvmsg += f'\n> {file._path}\t -> SKIPPED'
+            vmsg += tvmsg
+            print(tvmsg)
     
     for file in listed_files:
         correct = False
@@ -161,7 +168,7 @@ def decrypt_verify(self):
                         tvmsg = f'\n:{tncz.header.titleId} - Content.{tncz.header.contentType._name_}'
                         vmsg += tvmsg
                         print(tvmsg)
-                        # correct = self.verify_ncz(file)
+                        correct = VerifyTools.verify_ncz(temp_hfs, file)
                         break
             elif file.endswith('.tik'):
                 tvmsg = f'\n:{file[:16].upper()} - Content.TICKET'
@@ -194,9 +201,13 @@ def decrypt_verify(self):
             else:
                 correct = False
         
-        if correct == True:
-            if file.endswith('cnmt.nca'):
+        if bool(correct) == True:
+            if file.endswith('.cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRECT'
+                vmsg += tvmsg
+                print(tvmsg)
+            elif file.endswith('.tik') and correct == 'ncz':
+                tvmsg = f'> {file}\t -> is EXISTS'
                 vmsg += tvmsg
                 print(tvmsg)
             else:
@@ -205,11 +216,11 @@ def decrypt_verify(self):
                 print(tvmsg)
         else:
             verdict = False
-            if file.endswith('cnmt.nca'):
+            if file.endswith('.cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRUPT <<<-'
                 vmsg += tvmsg
                 print(tvmsg)
-            elif file.endswith('nca'):
+            elif file.endswith('.nca'):
                 tvmsg = f'> {file}\t\t -> is CORRUPT <<<-'
                 vmsg += tvmsg
                 print(tvmsg)
@@ -217,7 +228,7 @@ def decrypt_verify(self):
                     tvmsg = f'* NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY'
                     vmsg += tvmsg
                     print(tvmsg)
-            elif file.endswith('ncz'):
+            elif file.endswith('.ncz'):
                 tvmsg = f'> {file}\t\t -> is CORRUPT <<<-'
                 vmsg += tvmsg
                 print(tvmsg)
@@ -225,7 +236,7 @@ def decrypt_verify(self):
                     tvmsg = f'* NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY'
                     vmsg += tvmsg
                     print(tvmsg)
-            elif file.endswith('tik'):
+            elif file.endswith('.tik'):
                 tvmsg = f'> {file}\t\t -> is INCORRECT <<<-'
                 vmsg += tvmsg
                 print(tvmsg)
