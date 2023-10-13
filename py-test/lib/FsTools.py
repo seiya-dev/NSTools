@@ -18,8 +18,6 @@ def get_data_from_cnmt(nca):
             f.rewind()
             cnmt.rewind()
             
-            # titleid,titleversion,base_ID,keygeneration,rightsId,RSV,RGV,ctype,metasdkversion,exesdkversion,hasHtmlManual,Installedsize,DeltaSize,ncadata
-            
             title_id = cnmt.readInt64()
             data['title_id'] = (str(hx(title_id.to_bytes(8, byteorder='big')))[2:-1]).upper()
             
@@ -37,7 +35,6 @@ def get_data_from_cnmt(nca):
             cnmt.rewind()
             cnmt.seek(0x20)
             
-            # Why Base id? It's return Update ID
             base_id = cnmt.readInt64()
             data['base_id'] = (str(hx(base_id.to_bytes(8, byteorder='big')))[2:-1]).upper()
             
@@ -118,15 +115,15 @@ def get_data_from_cnmt(nca):
     return data
 
 def parse_cnmt_type_n(type_n):
-    if type_n == b'1':
+    if type_n == b'01':
         return 'SystemProgram'
-    if type_n == b'2':
+    if type_n == b'02':
         return 'SystemData'
-    if type_n == b'3':
+    if type_n == b'03':
         return 'SystemUpdate'
-    if type_n == b'4':
+    if type_n == b'04':
         return 'BootImagePackage'
-    if type_n == b'5':
+    if type_n == b'05':
         return 'BootImagePackageSafe'
     if type_n == b'80':
         return 'GAME'
@@ -139,18 +136,18 @@ def parse_cnmt_type_n(type_n):
     return 'Unknown'
 
 def get_metacontent_type(nca_type_number):
-    if nca_type_number == b'0':
+    if nca_type_number == b'00':
         return 'Meta'
-    if nca_type_number == b'1':
+    if nca_type_number == b'01':
         return 'Program'
-    if nca_type_number == b'2':
+    if nca_type_number == b'02':
         return 'Data'
-    if nca_type_number == b'3':
+    if nca_type_number == b'03':
         return 'Control'
-    if nca_type_number == b'4':
+    if nca_type_number == b'04':
         return 'HtmlDocument'
-    if nca_type_number == b'5':
+    if nca_type_number == b'05':
         return 'LegalInformation'
-    if nca_type_number == b'6':
+    if nca_type_number == b'06':
         return 'DeltaFragment'
     return 'Unknown'

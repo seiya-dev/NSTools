@@ -2,8 +2,17 @@ from binascii import hexlify as hx, unhexlify as uhx
 
 import Fs
 import io
+from lib import Hex
 
+import zstandard
 from lib import FsTools
+from lib import Header, BlockDecompressorReader
+
+def readInt64(f, byteorder='little', signed = False):
+    return int.from_bytes(f.read(8), byteorder=byteorder, signed=signed)
+
+def readInt128(f, byteorder='little', signed = False):
+    return int.from_bytes(f.read(16), byteorder=byteorder, signed=signed)
 
 def verify_nca_key(self, nca):
     print('[:WARN:] NOT IMPLEMENTED!')
@@ -58,12 +67,66 @@ def verify_enforcer(f):
                 return False
 
 def verify_ncz(self, target):
+    for nca in self:
+        if nca._path.endswith('.cnmt.nca'):
+            cnmtData = FsTools.get_data_from_cnmt(nca)
     for f in self:
-        if f._path.endswith('.cnmt.nca'):
-            cnmtData = FsTools.get_data_from_cnmt(f)
+        if f._path == target:
+            f.seek(0)
+            UNCOMPRESSABLE_HEADER_SIZE = 0x4000
+            header = f.read(UNCOMPRESSABLE_HEADER_SIZE)
+            
+            magic = f.read(0x8)
+            sectionCount = readInt64(f)
+            sections = [Header.Section(f) for _ in range(sectionCount)]
+            
+            if sections[0].offset - UNCOMPRESSABLE_HEADER_SIZE > 0:
+                fakeSection = Header.FakeSection(UNCOMPRESSABLE_HEADER_SIZE, sections[0].offset-UNCOMPRESSABLE_HEADER_SIZE)
+                sections.insert(0, fakeSection)
+            
+            nca_size = UNCOMPRESSABLE_HEADER_SIZE
+            for i in range(sectionCount):
+                nca_size += sections[i].size
+            
+            pos = f.tell()
+            blockMagic = f.read(8)
+            f.seek(pos)
+            useBlockCompression = blockMagic == b'NCZBLOCK'
+            blockSize = -1
+            
+            count = 0
+            checkstarter = 0
+            
+            if useBlockCompression:
+                BlockHeader = Header.Block(f)
+                decompressor = BlockDecompressorReader.BlockDecompressorReader(f, BlockHeader)
+            
+            pos = f.tell()
+            
+            if not useBlockCompression:
+                decompressor = zstandard.ZstdDecompressor().stream_reader(f)
+            
+            if cnmtData['title_id'].endswith('000'):
+                for s in sections:
+                    count += 1
+                    if count == 2:
+                        break
+                    checkstarter += s.size
+                test = int(checkstarter / 16384)
+                for i in (range(test + 1)):
+                    decompressor.seek(16384, 1)
+            
+            chunk = decompressor.read(16384)
+            
+            b1 = chunk[:32]
+            b2 = chunk[32:64]
+            
+            if sum(b1) !=0 and sum(b2) == 0:
+                return True
+            else:
+                return 'ncz'
     
-    
-    # end
+    # Failed
     return False
 
 def pr_noenc_check(self, file = None, mode = 'rb'):

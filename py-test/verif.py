@@ -206,6 +206,10 @@ def decrypt_verify(nspx):
                 tvmsg = f'> {file}\t -> is CORRECT'
                 vmsg += tvmsg
                 print(tvmsg)
+            elif file.endswith('.ncz') and correct == 'ncz':
+                tvmsg = f'> {file}\t\t -> ncz file needs HASH check'
+                vmsg += tvmsg
+                print(tvmsg)
             elif file.endswith('.tik') and correct == 'ncz':
                 tvmsg = f'> {file}\t -> is EXISTS'
                 vmsg += tvmsg
