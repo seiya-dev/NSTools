@@ -81,7 +81,7 @@ def verify_ncz(self, target):
             sections = [Header.Section(f) for _ in range(sectionCount)]
             
             if sections[0].offset - UNCOMPRESSABLE_HEADER_SIZE > 0:
-                fakeSection = Header.FakeSection(UNCOMPRESSABLE_HEADER_SIZE, sections[0].offset-UNCOMPRESSABLE_HEADER_SIZE)
+                fakeSection = Header.FakeSection(UNCOMPRESSABLE_HEADER_SIZE, sections[0].offset - UNCOMPRESSABLE_HEADER_SIZE)
                 sections.insert(0, fakeSection)
             
             nca_size = UNCOMPRESSABLE_HEADER_SIZE
@@ -92,10 +92,6 @@ def verify_ncz(self, target):
             blockMagic = f.read(8)
             f.seek(pos)
             useBlockCompression = blockMagic == b'NCZBLOCK'
-            blockSize = -1
-            
-            count = 0
-            checkstarter = 0
             
             if useBlockCompression:
                 BlockHeader = Header.Block(f)
@@ -105,6 +101,9 @@ def verify_ncz(self, target):
             
             if not useBlockCompression:
                 decompressor = zstandard.ZstdDecompressor().stream_reader(f)
+            
+            count = 0
+            checkstarter = 0
             
             if cnmtData['title_id'].endswith('000'):
                 for s in sections:
