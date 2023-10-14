@@ -8,7 +8,7 @@ import Fs
 from lib import VerifyTools
 
 def parse_name(file):
-    res = re.search(r'(?P<title_id>\[[A-F0-9]{16}\])( )?(?P<version>\[v\d+\])(.*)?(?P<type>\[(BASE|UPD(ATE)?|DLC( \d+)?)\])?(.*)?\.(xci|xcz|nsp|nsz)$', file, re.I)
+    res = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])\s?(?P<version>\[v\d+\]).*?(?P<type>\[(BASE|UPD(ATE)?|DLC( \d+)?)\])?.*?\.(xci|xcz|nsp|nsz)$', file, re.I)
     
     if res is None:
         return None
@@ -16,6 +16,9 @@ def parse_name(file):
     title_id = res.group('title_id')[1:-1]
     version = int(res.group('version')[2:-1])
     title_type = None
+    
+    if title_id[:-4] == '010000000000':
+        return None
     
     if version % 65536 != 0:
         return None
@@ -211,7 +214,7 @@ def decrypt_verify(nspx):
                 vmsg += tvmsg
                 print(tvmsg)
             elif file.endswith('.tik') and correct == 'ncz':
-                tvmsg = f'> {file}\t -> is EXISTS'
+                tvmsg = f'> {file}\t\t -> is EXISTS'
                 vmsg += tvmsg
                 print(tvmsg)
             else:
