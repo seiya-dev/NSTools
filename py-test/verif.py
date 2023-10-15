@@ -6,6 +6,7 @@ import re
 
 import Fs
 from lib import VerifyTools
+from lib.FsCert import PublicCert
 
 def parse_name(file):
     res = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])\s?(?P<version>\[v\d+\]).*?(?P<type>\[(BASE|UPD(ATE)?|DLC( \d+)?)\])?.*?\.(xci|xcz|nsp|nsz)$', file, re.I)
@@ -197,9 +198,23 @@ def decrypt_verify(nspx):
                 if len(listed_certs) > 0:
                     for f in temp_hfs:
                         if f._path.endswith('.cert'):
+                            certfile = f.read()
+                            certtype = ''
+                            certresl = ''
+                            
+                            if certfile == PublicCert.getPublic(ctype = 'Tinfoil'):
+                                certtype = 'Tinfoil'
+                            if certfile == PublicCert.getPublic(ctype = 'DBI'):
+                                certtype = 'DBI'
+                            
+                            if certtype != '':
+                                certresl = f'is CORRECT ({certtype})'
+                            else:
+                                certresl = f'Warning: doesn\'t follow normalized standard'
+                            
                             cert_message += f'\n:{f._path[:16].upper()} - Content.CERTIFICATE'
-                            cert_message += f'\n> {f._path}\t\t -> not TESTED'
-                            break
+                            cert_message += f'\n> {f._path}\t\t -> {certresl}'
+                
                 correct = check_tik
             else:
                 correct = False
