@@ -1,10 +1,10 @@
 import os
 import json
 import requests
-import verif
 import shutil
 import re
 
+from lib import Verify
 squirrel_dir = os.path.dirname(os.path.abspath(__file__))
 logs_dir = os.path.abspath(os.path.join(squirrel_dir, '..', 'logs'))
 
@@ -63,7 +63,7 @@ def scan_folder():
         send_hook(f'\n[:INFO:] File found: {item}')
         send_hook(f'[:INFO:] Checking syntax...')
         
-        data = verif.parse_name(item)
+        data = Verify.parse_name(item)
         
         if data is None:
             with open(lpath_badname, 'a') as f:
@@ -91,7 +91,7 @@ def scan_folder():
                     f.write(f'{item}\n')
         
         try:
-            verif.verify(item_path)
+            Verify.verify(item_path)
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')
         
