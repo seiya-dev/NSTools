@@ -348,10 +348,12 @@ def decrypt_verify(nspx):
                         print(tvmsg)
                         verdict = False
     
+    if len(titlerights) < 1:
+        tvmsg = ''
+    
     file_ext = nspx._path[-3:].upper()
     if verdict == True:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT\n'
-        
     else:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES\n'
     vmsg += tvmsg

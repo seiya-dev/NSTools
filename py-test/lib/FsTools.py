@@ -59,7 +59,7 @@ def get_data_from_cnmt(nca):
             
             data['keygeneration'] = keygeneration
             
-            cryptoHex = (keygeneration - 1).to_bytes(8, 'big').hex().upper()
+            cryptoHex = keygeneration.to_bytes(8, 'big').hex().upper()
             data['rightsId'] = data['title_id'] + cryptoHex
             
             data['hasHtmlManual'] = hasHtmlManual=False
