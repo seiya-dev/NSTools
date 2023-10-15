@@ -228,33 +228,33 @@ def decrypt_verify(nspx):
         if bool(correct) == True:
             if file.endswith('.cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRECT'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
             elif file.endswith('.ncz') and correct == 'ncz':
                 tvmsg = f'> {file}\t\t -> ncz file needs HASH check'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
             elif file.endswith('.tik') and correct == 'ncz':
                 tvmsg = f'> {file}\t\t -> is EXISTS'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
             else:
                 tvmsg = f'> {file}\t\t -> is CORRECT'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
         else:
             verdict = False
             if file.endswith('.cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRUPT <<<-'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
             elif file.endswith('.nca'):
                 tvmsg = f'> {file}\t\t -> is CORRUPT <<<-'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
                 if bad_dec == True:
                     tvmsg = f'* NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY'
-                    vmsg += tvmsg
+                    vmsg += '\n' + tvmsg
                     print(tvmsg)
             elif file.endswith('.ncz'):
                 tvmsg = f'> {file}\t\t -> is CORRUPT <<<-'
@@ -262,14 +262,15 @@ def decrypt_verify(nspx):
                 print(tvmsg)
                 if bad_dec == True:
                     tvmsg = f'* NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY'
-                    vmsg += tvmsg
+                    vmsg += '\n' + tvmsg
                     print(tvmsg)
             elif file.endswith('.tik'):
                 tvmsg = f'> {file}\t\t -> is INCORRECT <<<-'
-                vmsg += tvmsg
+                vmsg += '\n' + tvmsg
                 print(tvmsg)
         if cert_message:
             print(cert_message)
+            vmsg += '\n' + cert_message
     
     for nca in temp_hfs:
         if type(nca) == Fs.Nca.Nca:
@@ -321,7 +322,7 @@ def decrypt_verify(nspx):
                                     tvmsg = ''
                                     tvmsg += f'\n:{title_id} - Content.UNKNOWN'
                                     tvmsg += f'> {nca_name}\t\t -> is MISSING <<<-'
-                                    vmsg += tvmsg
+                                    vmsg += '\n' + tvmsg
                                     print(tvmsg)
                                     verdict = False
     
@@ -344,19 +345,20 @@ def decrypt_verify(nspx):
                         tvmsg = ''
                         tvmsg += f'\n:{missing_ticket[:16].upper()} - Content.TICKET'
                         tvmsg += f'> {missing_ticket}\t\t -> is MISSING <<<-'
-                        vmsg += tvmsg
+                        vmsg += '\n' + tvmsg
                         print(tvmsg)
                         verdict = False
     
-    if len(titlerights) < 1:
+    if len(titlerights) < 1 and isCard == False:
         tvmsg = ''
+        print('BAD?')
     
     file_ext = nspx._path[-3:].upper()
     if verdict == True:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT\n'
     else:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES\n'
-    vmsg += tvmsg
+    vmsg += '\n' + tvmsg
     print(tvmsg)
     
     return verdict, vmsg
