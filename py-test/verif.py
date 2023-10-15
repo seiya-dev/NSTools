@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from binascii import hexlify as hx, unhexlify as uhx
+
 import os
 import sys
 import re
@@ -70,9 +72,9 @@ def verify(file):
         raise e
 
 def decrypt_verify(nspx):
-    listed_files=list()
-    valid_files=list()
-    listed_certs=list()
+    listed_files = list()
+    valid_files = list()
+    listed_certs = list()
     
     verdict = True
     vmsg = ''
@@ -268,3 +270,91 @@ def decrypt_verify(nspx):
                 print(tvmsg)
         if cert_message:
             print(cert_message)
+    
+    for nca in temp_hfs:
+        if type(nca) == Fs.Nca.Nca:
+            if nca.header.contentType == Fs.Type.Content.META:
+                for f in nca:
+                    for cnmt in f:
+                        nca.rewind()
+                        cnmt.rewind()
+                        
+                        title_id = cnmt.readInt64()
+                        title_version = cnmt.read(0x4)
+                        
+                        cnmt.rewind()
+                        cnmt.seek(0xE)
+                        
+                        offset = cnmt.readInt16()
+                        content_entries = cnmt.readInt16()
+                        meta_entries = cnmt.readInt16()
+                        content_type = cnmt._path[:-22]
+                        
+                        title_id = str(hx(title_id.to_bytes(8, byteorder='big')))
+                        title_id = title_id[2:-1].upper()
+                        
+                        cnmt.seek(0x20)
+                        
+                        original_id = cnmt.readInt64()
+                        # if content_type == 'Application':
+                        #     original_id = title_id
+                        # else:
+                        #     original_id = str(hx(original_id.to_bytes(8, byteorder='big')))
+                        #     original_id = original_id[2:-1]
+                        
+                        cnmt.seek(0x20 + offset)
+                        
+                        for i in range(content_entries):
+                            vhash = cnmt.read(0x20)
+                            nca_id = cnmt.read(0x10)
+                            
+                            size = cnmt.read(0x6)
+                            nca_type = cnmt.readInt8()
+                            unknown = cnmt.read(0x1)
+                            
+                            nca_name = str(hx(nca_id))
+                            nca_name = f'{nca_name[2:-1]}.nca'
+                            ncz_name = f'{nca_name[:-4]}.ncz'
+                            
+                            if (nca_name not in listed_files and ncatype != 6) or (nca_name not in valid_files and nca_type!= 6):
+                                if ncz_name not in listed_files:
+                                    tvmsg = ''
+                                    tvmsg += f'\n:{title_id} - Content.UNKNOWN'
+                                    tvmsg += f'> {nca_name}\t\t -> is MISSING <<<-'
+                                    vmsg += tvmsg
+                                    print(tvmsg)
+                                    verdict = False
+    
+    ticket_list = list()
+    for ticket in temp_hfs:
+        if type(ticket) == Fs.Ticket.Ticket:
+            ticket_list.append(ticket._path)
+    
+    titlerights = list()
+    for nca in temp_hfs:
+        if str(nca._path).endswith('.ncz'):
+            nca = Fs.Nca.Nca(nca)
+        if type(nca) == Fs.Nca.Nca:
+            if nca.header.getRightsId() != 0:
+                rightsId = hx(nca.header.getRightsId().to_bytes(0x10, byteorder='big')).decode('utf-8').lower()
+                if rightsId not in titlerights:
+                    titlerights.append(rightsId)
+                    missing_ticket = f'{rightsId}.tik'
+                    if missing_ticket not in ticket_list:
+                        tvmsg = ''
+                        tvmsg += f'\n:{missing_ticket[:16].upper()} - Content.TICKET'
+                        tvmsg += f'> {missing_ticket}\t\t -> is MISSING <<<-'
+                        vmsg += tvmsg
+                        print(tvmsg)
+                        verdict = False
+    
+    file_ext = nspx._path[-3:].upper()
+    if verdict == True:
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT\n'
+        
+    else:
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES\n'
+    vmsg += tvmsg
+    print(tvmsg)
+    
+    return verdict, vmsg
