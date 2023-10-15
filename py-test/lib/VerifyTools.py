@@ -1,8 +1,11 @@
 from binascii import hexlify as hx, unhexlify as uhx
+from hashlib import sha256, sha1
 
 import Fs
 import io
+
 from lib import Hex
+from nut import Keys
 
 import zstandard
 from lib import FsTools
@@ -31,7 +34,7 @@ def verify_nca_key(self, nca):
 def verify_enforcer(f):
     if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.PROGRAM:
         for fs in f.sectionFilesystems:
-            if fs.fsType == Type.Fs.PFS0 and fs.cryptoType == Type.Crypto.CTR:
+            if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
                 f.seek(0)
                 ncaHeader = f.read(0x400)
                 sectionHeaderBlock = fs.buffer
@@ -126,6 +129,66 @@ def verify_ncz(self, target):
                 return 'ncz'
     
     # Failed
+    return False
+
+def verify_key(self, nca, ticket):
+    for file in self:
+        if type(file) == Fs.Nca.Nca and file._path == nca:
+            crypto1 = file.header.getCryptoType()
+            crypto2 = file.header.getCryptoType2()
+            if crypto1 == 2 and crypto1 > crypto2:
+                masterKeyRev = file.header.getCryptoType()
+            else:
+                masterKeyRev = file.header.getCryptoType2()
+    
+    for file in self:
+        if type(file) == Fs.Ticket.Ticket:
+            if ticket == None:
+                ticket = file._path
+            if file._path == ticket:
+                titleKeyBlock = file.getTitleKeyBlock().to_bytes(16, byteorder='big')
+                masterKeyIndex = Keys.getMasterKeyIndex(masterKeyRev)
+                titleKeyDec = Keys.decryptTitleKey(titleKeyBlock, masterKeyIndex)
+                rightsId = file.getRightsId()
+    
+    for f in self:
+        if f._path == nca:
+            if type(f) == Fs.Nca.Nca and f.header.getRightsId() != 0:
+                for fs in f.sectionFilesystems:
+                    if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
+                        print('[:WARN:] NOT IMPLEMENTED!')
+                        return False
+                    if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.CTR:
+                        f.seek(0)
+                        
+                        ncaHeader = Fs.Nca.NcaHeader()
+                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Fs.Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader = f.read(0x400)
+                        
+                        pfs0 = fs
+                        sectionHeaderBlock = fs.buffer
+                        
+                        levelOffset = int.from_bytes(sectionHeaderBlock[0x18:0x20], byteorder = 'little', signed = False)
+                        levelSize = int.from_bytes(sectionHeaderBlock[0x20:0x28], byteorder = 'little', signed = False)
+                        
+                        pfs0Offset = fs.f.offset + levelOffset
+                        f.seek(pfs0Offset)
+                        pfs0Header = f.read(levelSize)
+                        
+                        if sectionHeaderBlock[8:12] == b'IVFC':
+                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            data = mem.read()
+                            if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
+                                return True
+                            else:
+                                return False
+                        else:
+                            print('[:WARN:] NOT IMPLEMENTED!')
+                            return False
+                    if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.BKTR and f.header.contentType == Fs.Type.Content.PROGRAM:
+                        print('[:WARN:] NOT IMPLEMENTED!')
+                        return False
+    
     return False
 
 def pr_noenc_check(self, file = None, mode = 'rb'):

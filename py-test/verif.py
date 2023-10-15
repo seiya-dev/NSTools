@@ -179,12 +179,15 @@ def decrypt_verify(nspx):
                 vmsg += tvmsg
                 print(tvmsg)
                 
+                tik_file = file
                 check_tik = False
                 
                 for f in temp_hfs:
                     if f._path.endswith('.nca'):
                         if check_tik == False and f.header.getRightsId() != 0:
-                            print('[:WARN:] Not implemented')
+                            check_tik = VerifyTools.verify_key(temp_hfs, f._path, tik_file)
+                            if 	check_tik == True:
+                                break
                             break
                     if f._path.endswith('.ncz'):
                         tncz = Fs.Nca.Nca(f)
@@ -192,9 +195,10 @@ def decrypt_verify(nspx):
                             check_tik = 'ncz'
                             break
                 
-                if not f'{file[:-3]}cert' in listed_certs:
-                    cert_message += f'\n:{file[:16].upper()} - Content.CERTIFICATE'
-                    cert_message += f'> {file[:-3]}cert\t\t  -> is MISSING'
+                cert_file = f'{tik_file[:-3]}cert'
+                if not cert_file in listed_certs:
+                    cert_message += f'\n:{cert_file[:16].upper()} - Content.CERTIFICATE'
+                    cert_message += f'> {cert_file}\t\t  -> is MISSING'
                 if len(listed_certs) > 0:
                     for f in temp_hfs:
                         if f._path.endswith('.cert'):
