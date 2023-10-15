@@ -316,7 +316,7 @@ def decrypt_verify(nspx):
                             nca_name = f'{nca_name[2:-1]}.nca'
                             ncz_name = f'{nca_name[:-4]}.ncz'
                             
-                            if (nca_name not in listed_files and ncatype != 6) or (nca_name not in valid_files and nca_type!= 6):
+                            if (nca_name not in listed_files and nca_type != 6) or (nca_name not in valid_files and nca_type != 6):
                                 if ncz_name not in listed_files:
                                     tvmsg = ''
                                     tvmsg += f'\n:{title_id} - Content.UNKNOWN'
