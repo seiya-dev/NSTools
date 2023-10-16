@@ -77,12 +77,15 @@ def decrypt_verify(nspx):
     listed_certs = list()
     
     verdict = True
-    vmsg = ''
+    vmsg = list()
     
     if type(nspx) != Fs.Xci.Xci and type(nspx) != Fs.Nsp.Nsp:
         return False, msg
     
-    print('[:INFO:] DECRYPTION TEST')
+    tvmsg = '[:INFO:] DECRYPTION TEST'
+    print(tvmsg)
+    vmsg.append(tvmsg)
+    
     temp_hfs = nspx
     isCard = False
     
@@ -109,8 +112,8 @@ def decrypt_verify(nspx):
             tvmsg = ''
             tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
             tvmsg += f'\n> {file._path}\t -> SKIPPED'
-            vmsg += tvmsg
             print(tvmsg)
+            vmsg.append(tvmsg)
     
     for file in listed_files:
         correct = False
@@ -122,8 +125,8 @@ def decrypt_verify(nspx):
                 for f in temp_hfs:
                     if f._path == file:
                         tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
-                        vmsg += tvmsg
                         print(tvmsg)
+                        vmsg.append(tvmsg)
                         for nf in f:
                             nf.rewind()
                             test = nf.read(0x4)
@@ -136,8 +139,8 @@ def decrypt_verify(nspx):
                 for f in temp_hfs:
                     if f._path == file:
                         tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
-                        vmsg += tvmsg
                         print(tvmsg)
+                        vmsg.append(tvmsg)
                         if f.header.contentType != Fs.Type.Content.PROGRAM:
                             correct = VerifyTools.verify_enforcer(f)
                             if correct == True:
@@ -172,14 +175,14 @@ def decrypt_verify(nspx):
                     if f._path == file:
                         tncz = Fs.Nca.Nca(f)
                         tvmsg = f'\n:{tncz.header.titleId} - Content.{tncz.header.contentType._name_}'
-                        vmsg += tvmsg
                         print(tvmsg)
+                        vmsg.append(tvmsg)
                         correct = VerifyTools.verify_ncz(temp_hfs, file)
                         break
             elif file.endswith('.tik'):
                 tvmsg = f'\n:{file[:16].upper()} - Content.TICKET'
-                vmsg += tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
                 
                 tik_file = file
                 check_tik = False
@@ -200,7 +203,7 @@ def decrypt_verify(nspx):
                 cert_file = f'{tik_file[:-3]}cert'
                 if not cert_file in listed_certs:
                     cert_message += f'\n:{cert_file[:16].upper()} - Content.CERTIFICATE'
-                    cert_message += f'> {cert_file}\t\t  -> is MISSING'
+                    cert_message += f'\n> {cert_file}\t\t  -> is MISSING'
                 if len(listed_certs) > 0:
                     for f in temp_hfs:
                         if f._path.endswith('.cert'):
@@ -228,49 +231,49 @@ def decrypt_verify(nspx):
         if bool(correct) == True:
             if file.endswith('.cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRECT'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
             elif file.endswith('.ncz') and correct == 'ncz':
                 tvmsg = f'> {file}\t\t -> ncz file needs HASH check'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
             elif file.endswith('.tik') and correct == 'ncz':
                 tvmsg = f'> {file}\t\t -> is EXISTS'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
             else:
                 tvmsg = f'> {file}\t\t -> is CORRECT'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
         else:
             verdict = False
             if file.endswith('.cnmt.nca'):
                 tvmsg = f'> {file}\t -> is CORRUPT <<<-'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
             elif file.endswith('.nca'):
                 tvmsg = f'> {file}\t\t -> is CORRUPT <<<-'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
                 if bad_dec == True:
                     tvmsg = f'* NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY'
-                    vmsg += '\n' + tvmsg
                     print(tvmsg)
+                    vmsg.append(tvmsg)
             elif file.endswith('.ncz'):
                 tvmsg = f'> {file}\t\t -> is CORRUPT <<<-'
-                vmsg += tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
                 if bad_dec == True:
                     tvmsg = f'* NOTE: S.C. CONVERSION WAS PERFORMED WITH BAD KEY'
-                    vmsg += '\n' + tvmsg
                     print(tvmsg)
+                    vmsg.append(tvmsg)
             elif file.endswith('.tik'):
                 tvmsg = f'> {file}\t\t -> is INCORRECT <<<-'
-                vmsg += '\n' + tvmsg
                 print(tvmsg)
+                vmsg.append(tvmsg)
         if cert_message:
             print(cert_message)
-            vmsg += '\n' + cert_message
+            vmsg.append(cert_message)
     
     for nca in temp_hfs:
         if type(nca) == Fs.Nca.Nca:
@@ -321,9 +324,9 @@ def decrypt_verify(nspx):
                                 if ncz_name not in listed_files:
                                     tvmsg = ''
                                     tvmsg += f'\n:{title_id} - Content.UNKNOWN'
-                                    tvmsg += f'> {nca_name}\t\t -> is MISSING <<<-'
-                                    vmsg += '\n' + tvmsg
+                                    tvmsg += f'\n> {nca_name}\t\t -> is MISSING <<<-'
                                     print(tvmsg)
+                                    vmsg.append(tvmsg)
                                     verdict = False
     
     ticket_list = list()
@@ -344,21 +347,25 @@ def decrypt_verify(nspx):
                     if missing_ticket not in ticket_list:
                         tvmsg = ''
                         tvmsg += f'\n:{missing_ticket[:16].upper()} - Content.TICKET'
-                        tvmsg += f'> {missing_ticket}\t\t -> is MISSING <<<-'
-                        vmsg += '\n' + tvmsg
+                        tvmsg += f'\n> {missing_ticket}\t\t -> is MISSING <<<-'
                         print(tvmsg)
+                        vmsg.append(tvmsg)
                         verdict = False
     
     if len(titlerights) < 1 and isCard == False:
+        # verdict = False
         tvmsg = ''
-        print('BAD?')
     
     file_ext = nspx._path[-3:].upper()
     if verdict == True:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT\n'
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
     else:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES\n'
-    vmsg += '\n' + tvmsg
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES'
     print(tvmsg)
+    vmsg.append(tvmsg)
+    
+    # if verdict == False:
+    #     with open(f'{nspx._path}.verify-dec-bad.txt', 'w') as f:
+    #         f.write('\n'.join(vmsg) + '\n')
     
     return verdict, vmsg
