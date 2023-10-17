@@ -53,14 +53,19 @@ def scan_folder():
         print(f'[:WARN:] Please put your files in "{ipath}" and run this script again.') 
         return
     
+    files = list()
     for item in sorted(os.listdir(ipath)):
         item_path = os.path.join(ipath, item)
         if not os.path.isfile(item_path):
             continue
         if not item.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
             continue
-        
-        send_hook(f'\n[:INFO:] File found: {item}')
+        files.append(item)
+    
+    findex = 0
+    for item in sorted(files):
+        findex += 1
+        send_hook(f'\n[:INFO:] File found ({findex} of {len(files)}): {item}')
         send_hook(f'[:INFO:] Checking syntax...')
         
         data = Verify.parse_name(item)
@@ -91,7 +96,12 @@ def scan_folder():
                     f.write(f'{item}\n')
         
         try:
-            Verify.verify(item_path)
+            decryptionTest, decryptionLog = Verify.verify(item_path, forceTicket = False)
+            if decryptionTest != True:
+                with open(lpath_badfile, 'a') as f:
+                    f.write(f'{item}\n')
+                with open(f'{item_path}.verify-dec-bad.txt', 'w') as f:
+                    f.write(f'{decryptionLog}')
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')
         

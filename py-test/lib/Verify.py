@@ -46,7 +46,7 @@ def parse_name(file):
         'version': version,
     }
 
-def verify(file):
+def verify(file, forceTicket = False):
     try:
         filename = os.path.abspath(file)
         
@@ -66,12 +66,13 @@ def verify(file):
             log_info += f" {str(int(res['title_ext'], 16)).zfill(4)}"
         print(f'[:INFO:] Verifying... {log_info}\n')
         
-        check = decrypt_verify(f)
+        check, log = decrypt_verify(f, forceTicket)
+        return check, log + '\n'
         
     except BaseException as e:
         raise e
 
-def decrypt_verify(nspx):
+def decrypt_verify(nspx, forceTicket = False):
     listed_files = list()
     valid_files = list()
     listed_certs = list()
@@ -94,6 +95,14 @@ def decrypt_verify(nspx):
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
+            else:
+                for file in nspf:
+                    tvmsg = ''
+                    tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
+                    tvmsg += f'\n> {file._path}\t -> SKIPPED'
+                    tvmsg += f'\n* Partition: {nspf._path}'
+                    print(tvmsg)
+                    vmsg.append(tvmsg)
     
     for file in temp_hfs:
         if file._path.endswith(('.nca','.ncz','.tik')):
@@ -153,11 +162,10 @@ def decrypt_verify(nspx):
                         vmsg.append(tvmsg)
                         if f.header.contentType != Fs.Type.Content.PROGRAM:
                             correct = VerifyTools.verify_enforcer(f)
-                            if correct == True:
-                                if f.header.contentType == Fs.Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
-                                    correct = VerifyTools.pr_noenc_check_dlc(f)
-                                    if correct == False:
-                                        bad_dec = True
+                            if correct == True and f.header.contentType == Fs.Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
+                                correct = VerifyTools.pr_noenc_check_dlc(f)
+                                if correct == False:
+                                    bad_dec = True
                         else:
                             for nf in f:
                                 try:
@@ -167,16 +175,17 @@ def decrypt_verify(nspx):
                                         correct = True
                                         break
                                 except:
-                                    print(f'> Error reading {nf}')
+                                    tvmsg = f'* Error reading {nf}'
+                                    print(tvmsg)
+                                    vmsg.append(tvmsg)
                                     pass
                                 f.rewind()
-                            if correct == True:
-                                correct = VerifyTools.verify_enforcer(f)
-                            if correct == False and f.header.getRightsId() == 0:
-                                correct = VerifyTools.pr_noenc_check(temp_hfs, file)
-                            if correct == False and f.header.getRightsId() != 0:
-                                correct = VerifyTools.verify_nca_key(temp_hfs, file)
-                            if correct == True and f.header.getRightsId() == 0:
+                            if f.header.getRightsId() != 0:
+                                if correct == True:
+                                    correct = VerifyTools.verify_enforcer(f)
+                                if correct == False
+                                    correct = VerifyTools.verify_nca_key(temp_hfs, file)
+                            else:
                                 correct = VerifyTools.pr_noenc_check(temp_hfs, file)
                                 if correct == False:
                                     bad_dec = True
@@ -362,8 +371,8 @@ def decrypt_verify(nspx):
             verdict = False
     
     if len(titlerights) < 1 and isCard == False:
-        # verdict = False
-        tvmsg = ''
+        if bool(forceTicket) == True:
+            verdict = False
     
     file_ext = nspx._path[-3:].upper()
     if verdict == True:
@@ -373,8 +382,4 @@ def decrypt_verify(nspx):
     print(tvmsg)
     vmsg.append(tvmsg)
     
-    # if verdict == False:
-    #     with open(f'{nspx._path}.verify-dec-bad.txt', 'w') as f:
-    #         f.write('\n'.join(vmsg) + '\n')
-    
-    return verdict, vmsg
+    return verdict, '\n'.join(vmsg)
