@@ -115,6 +115,16 @@ def decrypt_verify(nspx):
             print(tvmsg)
             vmsg.append(tvmsg)
     
+    titlerights = list()
+    for nca in temp_hfs:
+        if str(nca._path).endswith('.ncz'):
+            nca = Fs.Nca.Nca(nca)
+        if type(nca) == Fs.Nca.Nca:
+            if nca.header.getRightsId() != 0:
+                rightsId = hx(nca.header.getRightsId().to_bytes(0x10, byteorder='big')).decode('utf-8').lower()
+                if rightsId not in titlerights:
+                    titlerights.append(rightsId)
+    
     for file in listed_files:
         correct = False
         bad_dec = False
@@ -191,7 +201,7 @@ def decrypt_verify(nspx):
                     if f._path.endswith('.nca'):
                         if check_tik == False and f.header.getRightsId() != 0:
                             check_tik = VerifyTools.verify_key(temp_hfs, f._path, tik_file)
-                            if 	check_tik == True:
+                            if check_tik == True:
                                 break
                             break
                     if f._path.endswith('.ncz'):
@@ -199,6 +209,9 @@ def decrypt_verify(nspx):
                         if check_tik == False and tncz.header.getRightsId() != 0:
                             check_tik = 'ncz'
                             break
+                
+                if len(titlerights) < 1:
+                    check_tik = 'unused'
                 
                 cert_file = f'{tik_file[:-3]}cert'
                 if not cert_file in listed_certs:
@@ -239,6 +252,10 @@ def decrypt_verify(nspx):
                 vmsg.append(tvmsg)
             elif file.endswith('.tik') and correct == 'ncz':
                 tvmsg = f'> {file}\t\t -> is EXISTS'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            elif file.endswith('.tik') and correct == 'unused':
+                tvmsg = f'> {file}\t\t -> is EXISTS (unused)'
                 print(tvmsg)
                 vmsg.append(tvmsg)
             else:
@@ -334,23 +351,15 @@ def decrypt_verify(nspx):
         if type(ticket) == Fs.Ticket.Ticket:
             ticket_list.append(ticket._path)
     
-    titlerights = list()
-    for nca in temp_hfs:
-        if str(nca._path).endswith('.ncz'):
-            nca = Fs.Nca.Nca(nca)
-        if type(nca) == Fs.Nca.Nca:
-            if nca.header.getRightsId() != 0:
-                rightsId = hx(nca.header.getRightsId().to_bytes(0x10, byteorder='big')).decode('utf-8').lower()
-                if rightsId not in titlerights:
-                    titlerights.append(rightsId)
-                    missing_ticket = f'{rightsId}.tik'
-                    if missing_ticket not in ticket_list:
-                        tvmsg = ''
-                        tvmsg += f'\n:{missing_ticket[:16].upper()} - Content.TICKET'
-                        tvmsg += f'\n> {missing_ticket}\t\t -> is MISSING <<<-'
-                        print(tvmsg)
-                        vmsg.append(tvmsg)
-                        verdict = False
+    for rightsId in titlerights:
+        missing_ticket = f'{rightsId}.tik'
+        if missing_ticket not in ticket_list:
+            tvmsg = ''
+            tvmsg += f'\n:{missing_ticket[:16].upper()} - Content.TICKET'
+            tvmsg += f'\n> {missing_ticket}\t\t -> is MISSING <<<-'
+            print(tvmsg)
+            vmsg.append(tvmsg)
+            verdict = False
     
     if len(titlerights) < 1 and isCard == False:
         # verdict = False
