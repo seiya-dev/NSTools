@@ -133,11 +133,12 @@ def load(fileName):
 		else:
 			pass
 
+rootPath = path.join(path.dirname(path.realpath(__file__)), '..')
 if sq_settings.key_system =="production":
 	homeKeys = path.expanduser('~/.switch/prod.keys')
 	raw_keys_file0 = Path(homeKeys)
-	raw_keys_file1 = Path('keys.txt')
-	raw_keys_file2 = Path('ztools/keys.txt')
+	raw_keys_file1 = Path(path.join(rootPath, 'keys.txt'))
+	raw_keys_file2 = Path(path.join(rootPath, 'ztools/keys.txt'))
 else:
 	homeKeys = path.expanduser('~/.switch/dev.keys')
 	raw_keys_file0 = Path(homeKeys)
