@@ -38,7 +38,7 @@ def verify_enforcer(f):
                 f.seek(0)
                 ncaHeader = f.read(0x400)
                 sectionHeaderBlock = fs.buffer
-                f.seek(fs.offset)
+                f.seek(fs.f.offset)
                 pfs0Header = f.read(0x10)
                 return True
             else:
@@ -49,7 +49,7 @@ def verify_enforcer(f):
                 f.seek(0)
                 ncaHeader = f.read(0x400)
                 sectionHeaderBlock = fs.buffer
-                f.seek(fs.offset)
+                f.seek(fs.f.offset)
                 pfs0Header = f.read(0x10)
                 return True
             else:
@@ -62,7 +62,7 @@ def verify_enforcer(f):
                 sectionHeaderBlock = fs.buffer
                 levelOffset = int.from_bytes(sectionHeaderBlock[0x18:0x20], byteorder='little', signed=False)
                 levelSize = int.from_bytes(sectionHeaderBlock[0x20:0x28], byteorder='little', signed=False)
-                offset = fs.offset + levelOffset
+                offset = fs.f.offset + levelOffset
                 f.seek(offset)
                 pfs0Header = f.read(levelSize)
                 return True
@@ -156,8 +156,34 @@ def verify_key(self, nca, ticket):
             if type(f) == Fs.Nca.Nca and f.header.getRightsId() != 0:
                 for fs in f.sectionFilesystems:
                     if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
-                        print('[:WARN:] NOT IMPLEMENTED!')
-                        return False
+                        f.seek(0)
+                        
+                        ncaHeader = Fs.Nca.NcaHeader()
+                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Fs.Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        
+                        pfs0 = fs
+                        
+                        sectionHeaderBlock = fs.buffer
+                        f.seek(fs.f.offset)
+                        
+                        pfs0Offset = fs.f.offset
+                        pfs0Header = f.read(0x10)
+                        
+                        if sectionHeaderBlock[8:12] == b'IVFC':
+                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            data = mem.read()
+                            if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
+                                return True
+                            else:
+                                return False
+                        else:
+                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            data = mem.read()
+                            magic = mem.read()[0:4]
+                            if magic != b'PFS0':
+                                pass
+                            else:
+                                return True
                     if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.CTR:
                         f.seek(0)
                         
@@ -183,11 +209,37 @@ def verify_key(self, nca, ticket):
                             else:
                                 return False
                         else:
-                            print('[:WARN:] NOT IMPLEMENTED!')
-                            return False
+                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            data = mem.read()
+                            magic = mem.read()[0:4]
+                            if magic != b'PFS0':
+                                return False
+                            else:
+                                return True
                     if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.BKTR and f.header.contentType == Fs.Type.Content.PROGRAM:
-                        print('[:WARN:] NOT IMPLEMENTED!')
-                        return False
+                        f.seek(0)
+                        
+                        ncaHeader = Fs.Nca.NcaHeader()
+                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Fs.Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader = f.read(0x400)
+                        
+                        pfs0 = fs
+                        sectionHeaderBlock = fs.buffer
+                        
+                        levelOffset = int.from_bytes(sectionHeaderBlock[0x18:0x20], byteorder = 'little', signed = False)
+                        levelSize = int.from_bytes(sectionHeaderBlock[0x20:0x28], byteorder = 'little', signed = False)
+                        
+                        pfs0Offset = fs.f.offset + levelOffset
+                        f.seek(pfs0Offset)
+                        pfs0Header = f.read(levelSize)
+                        
+                        if sectionHeaderBlock[8:12] == b'IVFC':
+                            for i in range(10):
+                                ini = 0x100 + (i * 0x10)
+                                fin = 0x110 + (i * 4)
+                                test = sectionHeaderBlock[ini:fin]
+                                if test == b'BKTR':
+                                    return True
     
     return False
 
