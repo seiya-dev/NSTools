@@ -75,6 +75,8 @@ def scan_folder():
     
     findex = 0
     for item in sorted(files):
+        item_path = os.path.join(ipath, item)
+        
         findex += 1
         send_hook(f'\n[:INFO:] File found ({findex} of {len(files)}): {item}')
         send_hook(f'[:INFO:] Checking syntax...')
@@ -83,7 +85,7 @@ def scan_folder():
         
         if data is None:
             with open(lpath_badname, 'a') as f:
-                f.write(f'{item}\n')
+                f.write(f'{item_path}\n')
             continue
         
         if re.match(r'^BASE|UPD(ATE)?|DLC|XCI$', fname) is not None:
@@ -110,8 +112,11 @@ def scan_folder():
             nspTest, nspLog = Verify.verify(item_path)
             if nspTest != True:
                 with open(lpath_badfile, 'a') as f:
-                    f.write(f'{item}\n')
+                    f.write(f'{item_path}\n')
                 with open(f'{item_path}.verify-bad.txt', 'w') as f:
+                    f.write(f'{nspLog}')
+            else:
+                with open(f'{item_path}.verify.txt', 'w') as f:
                     f.write(f'{nspLog}')
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')
