@@ -16,7 +16,7 @@ from Fs.Nca import Nca
 import enlighten
 import shutil
 from nut import Titles
-from nut.Titles import Title
+from nut import Titles as Title
 from lib.PathTools import *
 
 MEDIA_SIZE = 0x200
