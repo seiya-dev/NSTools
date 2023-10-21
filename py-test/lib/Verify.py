@@ -377,10 +377,12 @@ def decrypt_verify(nspx):
     
     bad_format = False
     if len(titlerights) < 1 and isCard == False:
+        verdict = False
         bad_format = True
     
     file_ext = nspx._path[-3:].upper()
-    if verdict == True and bad_format == True:
+    
+    if bad_format == True:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS IN WRONG FORMAT (XCI IN NSP)'
     elif verdict == True:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
