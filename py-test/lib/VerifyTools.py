@@ -18,18 +18,16 @@ def readInt128(f, byteorder='little', signed = False):
     return int.from_bytes(f.read(16), byteorder=byteorder, signed=signed)
 
 def verify_nca_key(self, nca):
-    print('[:WARN:] NOT IMPLEMENTED!')
-    return False
-    """
-    check=False;titleKey=0
+    check = False
+    titleKey = (0).to_bytes(16, byteorder='big')
+    
     for file in self:
-        if (file._path).endswith('.tik'):
+        if file._path.endswith('.tik'):
             titleKey = file.getTitleKeyBlock().to_bytes(16, byteorder='big')
-            check=self.verify_key(nca,str(file._path))
-            if check==True:
+            check = verify_key(self, nca, file._path)
+            if check == True:
                 break
     return check, titleKey
-    """
 
 def verify_enforcer(f):
     if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.PROGRAM:
@@ -127,9 +125,6 @@ def verify_ncz(self, target):
                 return True
             else:
                 return 'ncz'
-    
-    # Failed
-    return False
 
 def verify_key(self, nca, ticket):
     for file in self:

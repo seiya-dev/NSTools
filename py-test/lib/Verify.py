@@ -50,12 +50,12 @@ def verify(file, forceTicket = False):
     try:
         filename = os.path.abspath(file)
         
-        if file.endswith('.xci'):
+        if file.lower().endswith('.xci'):
             f = Fs.factory(filename)
             f.open(filename, 'rb')
-        elif file.endswith('.xcz'):
+        elif file.lower().endswith('.xcz'):
             f = Fs.Xci.Xci(filename)
-        elif file.endswith('.nsp') or file.endswith('.nsz'):
+        elif file.lower().endswith(('.nsp', '.nsz')):
             f = Fs.Nsp.Nsp(filename, 'rb')
         else:
             return False, {}
@@ -67,6 +67,10 @@ def verify(file, forceTicket = False):
         print(f'[:INFO:] Verifying... {log_info}\n')
         
         check, log = decrypt_verify(f, forceTicket)
+        
+        f.flush()
+        f.close()
+        
         return check, log + '\n'
         
     except BaseException as e:
@@ -183,7 +187,7 @@ def decrypt_verify(nspx, forceTicket = False):
                             if f.header.getRightsId() != 0:
                                 if correct == True:
                                     correct = VerifyTools.verify_enforcer(f)
-                                if correct == False
+                                if correct == False:
                                     correct = VerifyTools.verify_nca_key(temp_hfs, file)
                             else:
                                 correct = VerifyTools.pr_noenc_check(temp_hfs, file)

@@ -1,12 +1,23 @@
 import os
+import sys
 import json
 import requests
 import shutil
 import re
 
+from pathlib import Path
 from lib import Verify
-squirrel_dir = os.path.dirname(os.path.abspath(__file__))
-logs_dir = os.path.abspath(os.path.join(squirrel_dir, '..', 'logs'))
+
+# set app path
+appPath = Path(sys.argv[0])
+while not appPath.is_dir():
+    appPath = appPath.parents[0]
+appPath = os.path.abspath(appPath)
+print(f'[:INFO:] App Path: {appPath}')
+
+# set logs path
+logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
+print(f'[:INFO:] Logs Path: {logs_dir}')
 
 import argparse
 parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -96,15 +107,14 @@ def scan_folder():
                     f.write(f'{item}\n')
         
         try:
-            decryptionTest, decryptionLog = Verify.verify(item_path, forceTicket = False)
-            if decryptionTest != True:
+            nspTest, nspLog = Verify.verify(item_path, forceTicket = False)
+            if nspTest != True:
                 with open(lpath_badfile, 'a') as f:
                     f.write(f'{item}\n')
-                with open(f'{item_path}.verify-dec-bad.txt', 'w') as f:
-                    f.write(f'{decryptionLog}')
+                with open(f'{item_path}.verify-bad.txt', 'w') as f:
+                    f.write(f'{nspLog}')
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')
-        
 
 
 if __name__ == "__main__":
