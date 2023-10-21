@@ -241,27 +241,24 @@ def verify_key(self, nca, ticket):
 def pr_noenc_check(self, file = None, mode = 'rb'):
     print('[:WARN:] NOT IMPLEMENTED!')
     return False
-    """
-    indent = 1
-    tabs = '\t' * indent
+    
     check = False
     for f in self:
-        cryptoType=f.get_cryptoType()
-        cryptoKey=f.get_cryptoKey()
-        cryptoCounter=f.get_cryptoCounter()
-        super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
+        cryptoType = f.get_cryptoType()
+        cryptoKey = f.get_cryptoKey()
+        cryptoCounter = f.get_cryptoCounter()
+        # super(Fs.Nca.Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
         for g in f:
-            if type(g) == File:
-                if (str(g._path)) == 'main.npdm':
+            if type(g) == Fs.File.File:
+                if g._path == 'main.npdm':
                     check = True
                     break
-        if check==False:
+        if check == False:
             for f in self:
-                if f.fsType == Type.Fs.ROMFS and f.cryptoType == Type.Crypto.CTR:
-                    if f.magic==b'IVFC':
-                        check=True
+                if f.fsType == Fs.Type.Fs.ROMFS and f.cryptoType == Fs.Type.Crypto.CTR:
+                    if f.magic == b'IVFC':
+                        check = True
     return check
-    """
 
 def pr_noenc_check_dlc(self):
     crypto1 = self.header.getCryptoType()
