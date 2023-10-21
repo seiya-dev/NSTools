@@ -74,7 +74,7 @@ def verify(file):
         if verdict == False:
             tverdict = False
         
-        if filename.endswith('.xci') or filename.endswith('.nsp'):
+        if filename.endswith(('.xci','.nsp')):
             verdict, feed = f.verify_hash_nca(buffer, headerlist, verdict, feed)
         elif filename.endswith('.xcz'):
             verdict, feed = f.xcz_hasher(buffer, headerlist, verdict, feed)

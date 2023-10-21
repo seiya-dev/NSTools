@@ -1,11 +1,19 @@
 import os
+import sys
 import json
 import requests
-import verif
+import verify
 import shutil
 import re
 
-squirrel_dir = os.path.dirname(os.path.abspath(__file__))
+from pathlib import Path
+
+appPath = Path(sys.argv[0])
+while not appPath.is_dir():
+    appPath = appPath.parents[0]
+appPath = os.path.abspath(appPath)
+
+squirrel_dir = os.path.dirname(appPath)
 logs_dir = os.path.abspath(os.path.join(squirrel_dir, '..', 'logs'))
 
 import argparse
@@ -63,7 +71,7 @@ def scan_folder():
         send_hook(f'\n[:INFO:] File found: {item}')
         send_hook(f'[:INFO:] Checking syntax...')
         
-        data = verif.parse_name(item)
+        data = verify.parse_name(item)
         
         if data is None:
             with open(lpath_badname, 'a') as f:
@@ -98,7 +106,7 @@ def scan_folder():
         send_hook(f'[:INFO:] Verifying... {log_info}\n')
         
         try:
-            if not verif.verify(item_path):
+            if not verify.verify(item_path):
                 with open(lpath_badfile, 'a') as f:
                     f.write(f'{item}\n')
         except Exception as e:
