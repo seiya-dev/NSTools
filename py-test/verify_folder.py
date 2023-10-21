@@ -107,7 +107,7 @@ def scan_folder():
                     f.write(f'{item}\n')
         
         try:
-            nspTest, nspLog = Verify.verify(item_path, forceTicket = False)
+            nspTest, nspLog = Verify.verify(item_path)
             if nspTest != True:
                 with open(lpath_badfile, 'a') as f:
                     f.write(f'{item}\n')

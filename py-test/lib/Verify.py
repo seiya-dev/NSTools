@@ -7,6 +7,7 @@ import sys
 import re
 
 import Fs
+from pathlib import Path
 from lib import VerifyTools
 from lib.FsCert import PublicCert
 
@@ -46,12 +47,12 @@ def parse_name(file):
         'version': version,
     }
 
-def verify(file, forceTicket = False):
+def verify(file):
     try:
         filename = os.path.abspath(file)
         
         if file.lower().endswith('.xci'):
-            f = Fs.factory(filename)
+            f = Fs.factory(Path(filename))
             f.open(filename, 'rb')
         elif file.lower().endswith('.xcz'):
             f = Fs.Xci.Xci(filename)
@@ -66,7 +67,7 @@ def verify(file, forceTicket = False):
             log_info += f" {str(int(res['title_ext'], 16)).zfill(4)}"
         print(f'[:INFO:] Verifying... {log_info}\n')
         
-        check, log = decrypt_verify(f, forceTicket)
+        check, log = decrypt_verify(f)
         
         f.flush()
         f.close()
@@ -76,7 +77,7 @@ def verify(file, forceTicket = False):
     except BaseException as e:
         raise e
 
-def decrypt_verify(nspx, forceTicket = False):
+def decrypt_verify(nspx):
     listed_files = list()
     valid_files = list()
     listed_certs = list()
@@ -375,8 +376,7 @@ def decrypt_verify(nspx, forceTicket = False):
             verdict = False
     
     if len(titlerights) < 1 and isCard == False:
-        if bool(forceTicket) == True:
-            verdict = False
+        verdict = False
     
     file_ext = nspx._path[-3:].upper()
     if verdict == True:
