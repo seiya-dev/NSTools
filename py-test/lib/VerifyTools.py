@@ -250,9 +250,7 @@ def verify_key(self, nca, ticket):
     return False
 
 def pr_noenc_check(self, file = None, mode = 'rb'):
-    print('[:WARN:] NOT IMPLEMENTED!')
-    return False
-    
+    print('[:WARN:] NOT TESTED!')
     check = False
     for f in self:
         cryptoType = f.get_cryptoType()
