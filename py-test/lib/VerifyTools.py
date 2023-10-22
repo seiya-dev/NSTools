@@ -258,7 +258,8 @@ def pr_noenc_check(self, file = None, mode = 'rb'):
         cryptoType = f.get_cryptoType()
         cryptoKey = f.get_cryptoKey()
         cryptoCounter = f.get_cryptoCounter()
-        # super(Fs.Nca.Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
+        f = Fs.Nca.Nca(f)
+        f.open(file, mode, cryptoType, cryptoKey, cryptoCounter)
         for g in f:
             if type(g) == Fs.File.File:
                 if g._path == 'main.npdm':
