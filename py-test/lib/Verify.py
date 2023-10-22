@@ -89,10 +89,13 @@ def verify(file):
     except BaseException as e:
         raise e
 
-def verify_decrypt(nspx, vmsg = list()):
+def verify_decrypt(nspx, vmsg = None):
     listed_files = list()
     valid_files = list()
     listed_certs = list()
+    
+    if vmsg is None:
+        vmsg = list()
     
     verdict = True
     
@@ -406,9 +409,11 @@ def verify_decrypt(nspx, vmsg = list()):
     
     return verdict, vmsg
 
-def verify_sig(nspx, vmsg = list(), cnmt = 'check'):
+def verify_sig(nspx, vmsg = None, cnmt = 'check'):
     verdict = True
-    keygenerationlist = list()
+    
+    if vmsg is None:
+        vmsg = list()
     
     tvmsg = '\n[:INFO:] SIGNATURE 1 TEST'
     print(tvmsg)
