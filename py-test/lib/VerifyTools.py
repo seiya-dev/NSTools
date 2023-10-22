@@ -6,10 +6,21 @@ import io
 
 from lib import Hex
 from nut import Keys
+from nut import aes128
 
 import zstandard
 from lib import FsTools
 from lib import Header, BlockDecompressorReader
+from lib.NcaKeys import getNcaModulusKey
+
+from Crypto.Hash import SHA256
+from Crypto.Cipher import AES
+from Crypto.Util import Counter
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
+
+RSA_PUBLIC_EXPONENT = 0x10001
+FS_HEADER_LENGTH = 0x200
 
 def readInt64(f, byteorder='little', signed = False):
     return int.from_bytes(f.read(8), byteorder=byteorder, signed=signed)
@@ -299,3 +310,28 @@ def pr_noenc_check_dlc(self):
                     return False
                 else:
                     return True
+
+def verify_nca_sig_simple(self):
+    self.rewind()
+    sign1 = self.header.signature1
+    hcrypto = aes128.AESXTS(uhx(Keys.get('header_key')))
+    
+    self.header.rewind()
+    orig_header = self.header.read(0xC00)
+    self.header.seek(0x200)
+    headdata = self.header.read(0x200)
+    
+    self.header.seek(0x221)
+    sigKeyGen = self.header.readInt8()
+    
+    if sigKeyGen == 0:
+        pubkey = RSA.RsaKey(n = getNcaModulusKey('nca_header_fixed_key_modulus_00'), e = RSA_PUBLIC_EXPONENT)
+    else:
+        pubkey = RSA.RsaKey(n = getNcaModulusKey('nca_header_fixed_key_modulus_01'), e = RSA_PUBLIC_EXPONENT)
+    
+    rsapss = PKCS1_PSS.new(pubkey)
+    digest = SHA256.new(headdata)
+    
+    verification = rsapss.verify(digest, sign1)
+    return verification
+    

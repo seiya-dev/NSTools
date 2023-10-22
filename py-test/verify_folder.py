@@ -108,15 +108,20 @@ def scan_folder():
                 with open(lpath_badfolder, 'a') as f:
                     f.write(f'{item}\n')
         
+        rootpath = os.path.dirname(item_path)
+        basename = os.path.basename(item_path)
+        basename = f'{basename[:-4]}-{basename[-3:]}-verify'
+        log_name = os.path.join(rootpath, basename)
+        
         try:
             nspTest, nspLog = Verify.verify(item_path)
             if nspTest != True:
                 with open(lpath_badfile, 'a') as f:
                     f.write(f'{item_path}\n')
-                with open(f'{item_path}.verify-bad.txt', 'w') as f:
+                with open(f'{log_name}-bad.txt', 'w') as f:
                     f.write(f'{nspLog}')
             else:
-                with open(f'{item_path}.verify.txt', 'w') as f:
+                with open(f'{log_name}.txt', 'w') as f:
                     f.write(f'{nspLog}')
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')

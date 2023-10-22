@@ -67,28 +67,39 @@ def verify(file):
             log_info += f" {str(int(res['title_ext'], 16)).zfill(4)}"
         print(f'[:INFO:] Verifying... {log_info}\n')
         
-        check, log = decrypt_verify(f)
+        vmsg = list()
+        check = True
+        
+        check_decrypt, vmsg = verify_decrypt(f, vmsg)
+        if check_decrypt == False:
+            check = False
+        
+        check_sig, vmsg = verify_sig(f, vmsg)
+        if check_sig == False:
+            check = False
         
         f.flush()
         f.close()
         
-        return check, log + '\n'
+        outlog = os.path.basename(file) + '\n'
+        outlog += '\n'.join(vmsg) + '\n'
+        
+        return check, outlog
         
     except BaseException as e:
         raise e
 
-def decrypt_verify(nspx):
+def verify_decrypt(nspx, vmsg = list()):
     listed_files = list()
     valid_files = list()
     listed_certs = list()
     
     verdict = True
-    vmsg = list()
     
     if type(nspx) != Fs.Xci.Xci and type(nspx) != Fs.Nsp.Nsp:
         return False, msg
     
-    tvmsg = '[:INFO:] DECRYPTION TEST'
+    tvmsg = '\n[:INFO:] DECRYPTION TEST'
     print(tvmsg)
     vmsg.append(tvmsg)
     
@@ -375,20 +386,102 @@ def decrypt_verify(nspx):
             vmsg.append(tvmsg)
             verdict = False
     
-    bad_format = False
-    if len(titlerights) < 1 and isCard == False:
-        verdict = False
-        bad_format = True
-    
     file_ext = nspx._path[-3:].upper()
     
-    if bad_format == True:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS IN WRONG FORMAT (XCI IN NSP)'
-    elif verdict == True:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
+    bad_format = False
+    # Note: Ignore it for now, Tinfoil doesn't support install separate xci dlc
+    # if len(titlerights) < 1 and isCard == False:
+    #    bad_format = True
+    #    verdict = False
+    
+    if bad_format != True:
+        if verdict == True:
+            tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
+        else:
+            tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES'
     else:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES'
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS IN WRONG FORMAT (XCI IN NSP)'
     print(tvmsg)
     vmsg.append(tvmsg)
     
-    return verdict, '\n'.join(vmsg)
+    return verdict, vmsg
+
+def verify_sig(nspx, vmsg = list(), cnmt = 'check'):
+    verdict = True
+    keygenerationlist = list()
+    
+    tvmsg = '\n[:INFO:] SIGNATURE 1 TEST'
+    print(tvmsg)
+    vmsg.append(tvmsg)
+    
+    temp_hfs = nspx
+    isCard = False
+    
+    if(type(nspx) == Fs.Xci.Xci):
+        for nspf in nspx.hfs0:
+            if nspf._path == 'secure':
+                temp_hfs = nspf
+                isCard = True
+            else:
+                for file in nspf:
+                    tvmsg = ''
+                    tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
+                    tvmsg += f'\n> {file._path}\t -> SKIPPED'
+                    tvmsg += f'\n* Partition: {nspf._path}'
+                    print(tvmsg)
+                    vmsg.append(tvmsg)
+    
+    for f in temp_hfs:
+        if type(f) == Fs.Nca.Nca:
+            tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
+            print(tvmsg)
+            vmsg.append(tvmsg)
+            verify = VerifyTools.verify_nca_sig_simple(f)
+            
+            tabs = '\t'
+            if f.header.contentType != Fs.Type.Content.META:
+                tabs += '\t'
+            
+            if verify == True:
+                tvmsg = f'> {f._path}{tabs} -> is PROPER'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            else:
+                tvmsg = f'> {f._path}{tabs} -> was MODIFIED'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            
+            if verdict == True:
+                verdict = verify
+        if f._path.endswith('.ncz'):
+            ncz = Fs.Nca.Nca(f)
+            ncz._path = f._path
+            
+            tvmsg = f'\n:{ncz.header.titleId} - Content.{ncz.header.contentType._name_}'
+            print(tvmsg)
+            vmsg.append(tvmsg)
+            
+            verify = VerifyTools.verify_nca_sig_simple(ncz)
+            
+            if verify == True:
+                tvmsg = f'> {ncz._path}\t\t -> is PROPER'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            else:
+                tvmsg = f'> {ncz._path}\t\t -> was MODIFIED'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            
+            if verdict == True:
+                verdict = verify
+    
+    file_ext = nspx._path[-3:].upper()
+    
+    if verdict == True:
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS SAFE'
+    else:
+        tvmsg = f'\nVERDICT: {file_ext} FILE COULD\'VE BEEN TAMPERED WITH'
+    print(tvmsg)
+    vmsg.append(tvmsg)
+    
+    return verdict, vmsg
