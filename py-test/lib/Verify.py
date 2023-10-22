@@ -7,7 +7,10 @@ import re
 
 import Fs
 from pathlib import Path
+
+import zstandard
 from lib import VerifyTools
+from lib import Header, BlockDecompressorReader
 from lib.FsCert import PublicCert
 
 import enlighten
@@ -591,6 +594,154 @@ def verify_hash(nspx, headerlist, vmsg = None):
             vmsg.append(tvmsg)
             
             if f._path[:16] == sha[:16]:
+                tvmsg = '> FILE IS CORRECT'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            else:
+                verdict = False
+                tvmsg = '> FILE IS CORRUPT'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+        
+        if f._path.endswith('ncz'):
+            ncz = Fs.Nca.Nca(f)
+            ncz._path = f._path
+            
+            origheader = False
+            for i in range(len(headerlist)):
+                if f._path == headerlist[i][0]:
+                    origheader = headerlist[i][1]
+                    listedhash = headerlist[i][2]
+                    break
+            
+            tvmsg = f'\n:{ncz.header.titleId} - Content.{ncz.header.contentType._name_}'
+            print(tvmsg)
+            vmsg.append(tvmsg)
+            
+            nca_size = ncz.header.size
+            
+            counter = 0
+            mbDiv = 1048576
+            BAR_FMT = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| {count:{len_total}d}/{total:d} {unit} [{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
+            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Decompress', unit="MiB", color='red', bar_format=BAR_FMT)
+            
+            i = 0
+            f.rewind();
+            rawheader=f.read(0xC00)
+            f.rewind()
+            sha=sha256()
+            f.seek(0xC00)
+            sha.update(rawheader)
+            
+            if origheader != False and listedhash == False:
+                sha0 = sha256()
+                sha0.update(origheader)
+            
+            i += 1
+            counter += len(rawheader)
+            bar.count = counter//mbDiv
+            bar.refresh()
+            f.flush()
+            
+            size = 0x4000 - 0xC00
+            dif = f.read(size)
+            sha.update(dif)
+            if origheader != False and listedhash == False:
+                sha0.update(dif)
+            counter += len(dif)
+            bar.count = counter//mbDiv
+            bar.refresh()
+            f.flush()
+            
+            UNCOMPRESSABLE_HEADER_SIZE = 0x4000
+            
+            f.seek(UNCOMPRESSABLE_HEADER_SIZE)
+            magic = VerifyTools.readInt64(f)
+            sectionCount = VerifyTools.readInt64(f)
+            sections = [Header.Section(f) for _ in range(sectionCount)]
+            
+            if sections[0].offset - UNCOMPRESSABLE_HEADER_SIZE > 0:
+                fakeSection = Header.FakeSection(UNCOMPRESSABLE_HEADER_SIZE, sections[0].offset - UNCOMPRESSABLE_HEADER_SIZE)
+                sections.insert(0, fakeSection)
+            
+            pos = f.tell()
+            blockMagic = f.read(8)
+            f.seek(pos)
+            useBlockCompression = blockMagic == b'NCZBLOCK'
+            
+            if useBlockCompression:
+                BlockHeader = Header.Block(f)
+                decompressor = BlockDecompressorReader.BlockDecompressorReader(f, BlockHeader)
+            
+            pos = f.tell()
+            
+            if not useBlockCompression:
+                decompressor = zstandard.ZstdDecompressor().stream_reader(f)
+            
+            spsize = 0
+            
+            for s in sections:
+                end = s.offset + s.size
+                if s.cryptoType == 1: #plain text
+                    spsize += s.size
+                    end = s.offset + s.size
+                    i = s.offset
+                    while i < end:
+                        chunkSz = buffer if end - i > buffer else end - i
+                        if useBlockCompression:
+                            chunk = decompressor.read(chunkSz)
+                        else:
+                            chunk = decompressor.read(chunkSz)
+                        if not len(chunk):
+                            break
+                        sha.update(chunk)
+                        if origheader != False and listedhash == False:
+                            sha0.update(chunk)
+                        counter += len(chunk)
+                        bar.count = counter//mbDiv
+                        bar.refresh()
+                        i += chunkSz
+                elif s.cryptoType not in (3, 4):
+                    raise IOError('Unknown crypto type: %d' % s.cryptoType)
+                else:
+                    crypto = VerifyTools.AESCTR(s.cryptoKey, s.cryptoCounter)
+                    spsize += s.size
+                    test = int(spsize/(buffer))
+                    i = s.offset
+                    while i < end:
+                        crypto.seek(i)
+                        chunkSz = buffer if end - i > buffer else end - i
+                        if useBlockCompression:
+                            chunk = decompressor.read(chunkSz)
+                        else:
+                            chunk = decompressor.read(chunkSz)
+                        if not len(chunk):
+                            break
+                        crpt = crypto.encrypt(chunk)
+                        sha.update(crpt)
+                        if origheader != False and listedhash == False:
+                            sha0.update(crpt)
+                        counter += len(chunk)
+                        bar.count = counter//mbDiv
+                        bar.refresh()
+                        i += chunkSz
+                
+            bar.close()
+            sha = sha.hexdigest()
+            if listedhash != False:
+                sha0 = listedhash
+            elif origheader != False:
+                sha0 = sha0.hexdigest()
+            
+            tvmsg = ''
+            tvmsg += f'> FILE: {ncz._path}'
+            tvmsg += f'\n> SHA256: {sha}'
+            if origheader != False:
+                tvmsg += f'\n> ORIG_SHA256: {sha0}'
+            print(tvmsg)
+            vmsg.append(tvmsg)
+            
+            if ncz._path[:16] == sha[:16]:
                 tvmsg = '> FILE IS CORRECT'
                 print(tvmsg)
                 vmsg.append(tvmsg)

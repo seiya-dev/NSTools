@@ -28,6 +28,24 @@ def readInt64(f, byteorder='little', signed = False):
 def readInt128(f, byteorder='little', signed = False):
     return int.from_bytes(f.read(16), byteorder=byteorder, signed=signed)
 
+class AESCTR:
+    def __init__(self, key, nonce, offset = 0):
+        self.key = key
+        self.nonce = nonce
+        self.seek(offset)
+    
+    def encrypt(self, data, ctr=None):
+        if ctr is None:
+            ctr = self.ctr
+        return self.aes.encrypt(data)
+    
+    def decrypt(self, data, ctr=None):
+        return self.encrypt(data, ctr)
+    
+    def seek(self, offset):
+        self.ctr = Counter.new(64, prefix=self.nonce[0:8], initial_value=(offset >> 4))
+        self.aes = AES.new(self.key, AES.MODE_CTR, counter=self.ctr)
+
 def verify_nca_key(self, nca):
     check = False
     titleKey = (0).to_bytes(16, byteorder='big')
