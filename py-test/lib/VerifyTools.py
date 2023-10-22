@@ -328,5 +328,24 @@ def verify_nca_sig_simple(self):
     digest = SHA256.new(headdata)
     
     verification = rsapss.verify(digest, sign1)
-    return verification
+    
+    crypto1 = self.header.getCryptoType()
+    crypto2 = self.header.getCryptoType2()
+    if crypto2 > crypto1:
+        masterKeyRev = crypto2
+    if crypto2 <= crypto1:
+        masterKeyRev = crypto1
+    currkg = masterKeyRev
+    
+    verify_data = {
+        'verify': verification,
+        'origheader': False,
+        'ncaname': self._path,
+        'origkg': currkg,
+        'titlerights': False, # self.header.getRightsId(),
+        'titlekey': False,
+        'isGC': bool(self.header.isGameCard),
+    }
+    
+    return verify_data
     
