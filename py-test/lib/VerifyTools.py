@@ -249,15 +249,10 @@ def verify_key(self, nca, ticket):
     
     return False
 
-def pr_noenc_check(self, file = None, mode = 'rb'):
-    print('[:WARN:] NOT TESTED!')
+def pr_noenc_check(self):
     check = False
+    
     for f in self:
-        cryptoType = f.get_cryptoType()
-        cryptoKey = f.get_cryptoKey()
-        cryptoCounter = f.get_cryptoCounter()
-        f = Fs.Nca.Nca(f)
-        f.open(file, mode, cryptoType, cryptoKey, cryptoCounter)
         for g in f:
             if type(g) == Fs.File.File:
                 if g._path == 'main.npdm':
@@ -268,6 +263,7 @@ def pr_noenc_check(self, file = None, mode = 'rb'):
                 if f.fsType == Fs.Type.Fs.ROMFS and f.cryptoType == Fs.Type.Crypto.CTR:
                     if f.magic == b'IVFC':
                         check = True
+    
     return check
 
 def pr_noenc_check_dlc(self):

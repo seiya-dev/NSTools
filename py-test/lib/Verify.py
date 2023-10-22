@@ -86,7 +86,7 @@ def verify(file):
         
         return check, outlog
         
-    except BaseException as e:
+    except Exception as e:
         raise e
 
 def verify_decrypt(nspx, vmsg = None):
@@ -205,7 +205,7 @@ def verify_decrypt(nspx, vmsg = None):
                                 if correct == False:
                                     correct = VerifyTools.verify_nca_key(temp_hfs, file)
                             else:
-                                correct = VerifyTools.pr_noenc_check(temp_hfs, file)
+                                correct = VerifyTools.pr_noenc_check(f)
                                 if correct == False:
                                     bad_dec = True
             elif file.endswith('.ncz'):
