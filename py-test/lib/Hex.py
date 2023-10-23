@@ -20,20 +20,20 @@ def bufferToAscii(buffer, start, count):
     return accumulator
 
 def dump(data, size = 16):
-	bytesRead = len(data)
-	index = 0
-	hexFormat = '{:'+str(size*3)+'}'
-	asciiFormat = '{:'+str(size)+'}'
-
-	print()
-	while index < bytesRead:
-		
-		hex = bufferToHex(data, index, size)
-		ascii = bufferToAscii(data, index, size)
-
-		print(hexFormat.format(hex), end='')
-		print('|',asciiFormat.format(ascii),'|')
-		
-		index += size
-		if bytesRead - index < size:
-			size = bytesRead - index
+    bytesRead = len(data)
+    index = 0
+    hexFormat = '{:'+str(size*3)+'}'
+    asciiFormat = '{:'+str(size)+'}'
+    
+    print()
+    while index < bytesRead:
+        
+        hex = bufferToHex(data, index, size)
+        ascii = bufferToAscii(data, index, size)
+    
+        print(hexFormat.format(hex), end='')
+        print('|',asciiFormat.format(ascii),'|')
+        
+        index += size
+        if bytesRead - index < size:
+            size = bytesRead - index

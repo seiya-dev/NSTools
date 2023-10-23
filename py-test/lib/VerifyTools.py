@@ -21,6 +21,7 @@ from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
 
 RSA_PUBLIC_EXPONENT = 0x10001
 FS_HEADER_LENGTH = 0x200
+UNCOMPRESSABLE_HEADER_SIZE = 0x4000
 
 def readInt64(f, byteorder='little', signed = False):
     return int.from_bytes(f.read(8), byteorder=byteorder, signed=signed)
@@ -103,7 +104,6 @@ def verify_ncz(self, target):
     for f in self:
         if f._path == target:
             f.seek(0)
-            UNCOMPRESSABLE_HEADER_SIZE = 0x4000
             header = f.read(UNCOMPRESSABLE_HEADER_SIZE)
             
             magic = f.read(0x8)
@@ -357,13 +357,18 @@ def verify_nca_sig_simple(self):
     
     verify_data = {
         'verify': verification,
-        'origheader': False,
         'ncaname': self._path,
-        'origkg': currkg,
-        'titlerights': False, # self.header.getRightsId(),
-        'titlekey': False,
-        'isGC': bool(self.header.isGameCard),
+        'origheader': False,
+        'notes': list(),
     }
     
+    if verification == False:
+        verify_data['origheader'] = orig_header
+        return verify_nca_sig(self, verify_data)
+    
+    return verify_data
+    
+def verify_nca_sig(self, verify_data):
+    # this just useless additional checks, don't bother for now...
     return verify_data
     

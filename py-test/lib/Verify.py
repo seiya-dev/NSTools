@@ -9,6 +9,7 @@ import Fs
 from pathlib import Path
 
 import zstandard
+from lib import FsTools
 from lib import VerifyTools
 from lib import Header, BlockDecompressorReader
 from lib.FsCert import PublicCert
@@ -21,6 +22,7 @@ def parse_name(file):
     if res is None:
         return None
     
+    # define main data
     title_id = res.group('title_id')[1:-1]
     version = int(res.group('version')[2:-1])
     title_type = None
@@ -41,6 +43,7 @@ def parse_name(file):
     elif title_oei % 2 == 1 and int(title_ext, 16) > 0:
         title_type = 'DLC'
     
+    # can't define title_type
     if title_type is None:
         return None
     
@@ -401,17 +404,17 @@ def verify_decrypt(nspx, vmsg = None):
     
     bad_format = False
     # Note: Ignore it for now, Tinfoil doesn't support install separate xci dlc
-    # if len(titlerights) < 1 and isCard == False:
+    # if len(titlerights) < 1 and isCard == False and verdict == True:
     #    bad_format = True
     #    verdict = False
     
-    if bad_format != True:
-        if verdict == True:
-            tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
-        else:
-            tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES'
+    if bad_format == True:
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS IN WRONG FORMAT (XCI/XCZ->NSP/NSZ)'
+    elif verdict == True:
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
     else:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS IN WRONG FORMAT (XCI IN NSP)'
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT OR MISSES FILES'
+    
     print(tvmsg)
     vmsg.append(tvmsg)
     
@@ -428,6 +431,8 @@ def verify_sig(nspx, vmsg = None):
     vmsg.append(tvmsg)
     
     headerlist = list()
+    hashlist = {}
+    
     temp_hfs = nspx
     isCard = False
     
@@ -436,14 +441,14 @@ def verify_sig(nspx, vmsg = None):
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
-            else:
-                for file in nspf:
-                    tvmsg = ''
-                    tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
-                    tvmsg += f'\n> {file._path}\t -> SKIPPED'
-                    tvmsg += f'\n* Partition: {nspf._path}'
-                    print(tvmsg)
-                    vmsg.append(tvmsg)
+    
+    for f in temp_hfs:
+        if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.META:
+            verify = VerifyTools.verify_nca_sig_simple(f)
+            if verify['verify'] == True:
+                meta = FsTools.get_data_from_cnmt(f)
+                for nca in meta['ncaData']:
+                    hashlist[nca['ncaId']] = nca['hash']
     
     for f in temp_hfs:
         if type(f) == Fs.Nca.Nca:
@@ -452,7 +457,12 @@ def verify_sig(nspx, vmsg = None):
             vmsg.append(tvmsg)
             
             verify = VerifyTools.verify_nca_sig_simple(f)
-            headerlist.append([verify['ncaname'],verify['origheader'],False,verify['titlerights'],verify['titlekey'],verify['isGC']])
+            
+            listedhash = False
+            if verify['verify'] != True and verify['ncaname'][:32] in hashlist:
+                listedhash = hashlist[verify['ncaname'][:32]]
+            
+            headerlist.append([verify['ncaname'],verify['origheader'],listedhash])
             
             tabs = '\t'
             if f.header.contentType != Fs.Type.Content.META:
@@ -478,7 +488,12 @@ def verify_sig(nspx, vmsg = None):
             vmsg.append(tvmsg)
             
             verify = VerifyTools.verify_nca_sig_simple(ncz)
-            headerlist.append([verify['ncaname'],verify['origheader'],False,verify['titlerights'],verify['titlekey'],verify['isGC']])
+            
+            listedhash = False
+            if verify['verify'] != True and verify['ncaname'][:32] in hashlist:
+                listedhash = hashlist[verify['ncaname'][:32]]
+            
+            headerlist.append([verify['ncaname'],verify['origheader'],listedhash])
             
             if verify['verify'] == True:
                 tvmsg = f'> {ncz._path}\t\t -> is PROPER'
@@ -505,6 +520,7 @@ def verify_sig(nspx, vmsg = None):
 
 def verify_hash(nspx, headerlist, vmsg = None):
     verdict = True
+    modded = False
     buffer = 65536
     
     if vmsg is None:
@@ -522,18 +538,11 @@ def verify_hash(nspx, headerlist, vmsg = None):
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
-            else:
-                for file in nspf:
-                    tvmsg = ''
-                    tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
-                    tvmsg += f'\n> {file._path}\t -> SKIPPED'
-                    tvmsg += f'\n* Partition: {nspf._path}'
-                    print(tvmsg)
-                    vmsg.append(tvmsg)
     
     for f in temp_hfs:
         if type(f) == Fs.Nca.Nca:
             origheader = False
+            listedhash = False
             for i in range(len(headerlist)):
                 if f._path == headerlist[i][0]:
                     origheader = headerlist[i][1]
@@ -549,7 +558,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
             counter = 0
             mbDiv = 1048576
             BAR_FMT = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| {count:{len_total}d}/{total:d} {unit} [{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
-            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Decompress', unit="MiB", color='red', bar_format=BAR_FMT)
+            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Hashing', unit='MiB', color='red', bar_format=BAR_FMT)
             
             i = 0
             f.rewind();
@@ -597,6 +606,11 @@ def verify_hash(nspx, headerlist, vmsg = None):
                 tvmsg = '> FILE IS CORRECT'
                 print(tvmsg)
                 vmsg.append(tvmsg)
+            elif origheader != False and f._path[:16] == sha0[:16]:
+                modded = True
+                tvmsg = '> FILE WAS MODIFIED'
+                print(tvmsg)
+                vmsg.append(tvmsg)
             else:
                 verdict = False
                 tvmsg = '> FILE IS CORRUPT'
@@ -608,6 +622,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
             ncz._path = f._path
             
             origheader = False
+            listedhash = False
             for i in range(len(headerlist)):
                 if f._path == headerlist[i][0]:
                     origheader = headerlist[i][1]
@@ -623,7 +638,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
             counter = 0
             mbDiv = 1048576
             BAR_FMT = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| {count:{len_total}d}/{total:d} {unit} [{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
-            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Decompress', unit="MiB", color='red', bar_format=BAR_FMT)
+            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Hashing', unit='MiB', color='red', bar_format=BAR_FMT)
             
             i = 0
             f.rewind();
@@ -745,6 +760,11 @@ def verify_hash(nspx, headerlist, vmsg = None):
                 tvmsg = '> FILE IS CORRECT'
                 print(tvmsg)
                 vmsg.append(tvmsg)
+            elif origheader != False and ncz._path[:16] == sha0[:16]:
+                modded = True
+                tvmsg = '> FILE WAS MODIFIED'
+                print(tvmsg)
+                vmsg.append(tvmsg)
             else:
                 verdict = False
                 tvmsg = '> FILE IS CORRUPT'
@@ -753,20 +773,19 @@ def verify_hash(nspx, headerlist, vmsg = None):
     
     file_ext = nspx._path[-3:].upper()
     
-    if verdict == True:
-        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT'
+    if verdict == False:
+        modded = False
+    
+    if modded == True:
+        verdict = False
+    
+    if modded == True:
+        tvmsg = f'\nVERDICT: {file_ext} FILE WAS MODIFIED'
+    elif verdict == True:
+        tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRECT' 
     else:
         tvmsg = f'\nVERDICT: {file_ext} FILE IS CORRUPT'
     print(tvmsg)
     vmsg.append(tvmsg)
     
     return verdict, vmsg
-
-"""
-if filename.endswith(('.xci','.nsp')):
-    verdict, feed = f.verify_hash_nca(buffer, headerlist, verdict, feed) xci 8423 nsp 8831
-elif filename.endswith('.xcz'):
-    verdict, feed = f.xcz_hasher(buffer, headerlist, verdict, feed)
-elif filename.endswith('.nsz'):
-    verdict, feed = f.nsz_hasher(buffer, headerlist, verdict, feed)
-"""

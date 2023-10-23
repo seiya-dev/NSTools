@@ -43,5 +43,5 @@ def getNcaModulusKey(keytype = None):
     }
     
     if keytype not in keylist:
-        return keylist
+        raise Exception('Selected BAD NCA MODULUS KEY!')
     return keylist[keytype]
