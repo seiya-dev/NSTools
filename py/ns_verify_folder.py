@@ -2,7 +2,6 @@ import os
 import sys
 import json
 import requests
-import shutil
 import re
 
 from pathlib import Path
@@ -23,15 +22,19 @@ import argparse
 parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input',  help = 'input folder')
 parser.add_argument('-w', '--webhook-url', help = 'discord webhook url', required = False)
+parser.add_argument('--save-log', help = 'save verify log', required = False, action='store_true')
 args = parser.parse_args()
-config = vars(args)
 
-INCP_PATH = config['input']
-WHOOK_URL = config['webhook_url']
+INCP_PATH = args.input
+WHOOK_URL = args.webhook_url
+SAVE_VLOG = bool(args.save_log)
 
-def send_hook(message_content):
+def send_hook(message_content, PadPrint = False):
     try:
-        print(message_content)
+        print_msg = message_content
+        if PadPrint == True:
+            print_msg = f'\n{message_content}'
+        print(print_msg)
         payload = {
             'username': 'Contributions',
             'content': message_content.strip()
@@ -53,12 +56,12 @@ def scan_folder():
     if not os.path.exists(logs_dir):
         os.makedirs(logs_dir)
     
-    if os.path.exists(lpath_badfolder):
-        os.remove(lpath_badfolder)
-    if os.path.exists(lpath_badname):
-        os.remove(lpath_badname)
-    if os.path.exists(lpath_badfile):
-        os.remove(lpath_badfile)
+    # if os.path.exists(lpath_badfolder):
+    #     os.remove(lpath_badfolder)
+    # if os.path.exists(lpath_badname):
+    #     os.remove(lpath_badname)
+    # if os.path.exists(lpath_badfile):
+    #     os.remove(lpath_badfile)
     
     if not os.path.exists(ipath):
         print(f'[:WARN:] Please put your files in "{ipath}" and run this script again.') 
@@ -78,12 +81,13 @@ def scan_folder():
         item_path = os.path.join(ipath, item)
         
         findex += 1
-        send_hook(f'\n[:INFO:] File found ({findex} of {len(files)}): {item}')
-        send_hook(f'[:INFO:] Checking syntax...')
+        send_hook(f'[:INFO:] File found ({findex} of {len(files)}): {item}', True)
+        send_hook(f'[:INFO:] Checking filename...')
         
         data = Verify.parse_name(item)
         
         if data is None:
+            send_hook(f'{item_path}: BAD NAME')
             with open(lpath_badname, 'a') as f:
                 f.write(f'{item_path}\n')
             continue
@@ -114,15 +118,21 @@ def scan_folder():
         log_name = os.path.join(rootpath, basename)
         
         try:
+            send_hook(f'[:INFO:] Verifying...')
             nspTest, nspLog = Verify.verify(item_path)
             if nspTest != True:
+                send_hook(f'{item_path}: BAD', True)
                 with open(lpath_badfile, 'a') as f:
                     f.write(f'{item_path}\n')
-                with open(f'{log_name}-bad.txt', 'w') as f:
-                    f.write(f'{nspLog}')
             else:
-                with open(f'{log_name}.txt', 'w') as f:
-                    f.write(f'{nspLog}')
+                send_hook(f'{item_path}: OK', True)
+            if SAVE_VLOG == True:
+                if nspTest != True:
+                    with open(f'{log_name}-bad.log', 'w') as f:
+                        f.write(f'{nspLog}')
+                else:
+                    with open(f'{log_name}-ok.log', 'w') as f:
+                        f.write(f'{nspLog}')
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')
 

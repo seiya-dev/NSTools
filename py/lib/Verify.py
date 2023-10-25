@@ -17,14 +17,14 @@ from lib.FsCert import PublicCert
 import enlighten
 
 def parse_name(file):
-    res = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])\s?(?P<version>\[v\d+\]).*?(?P<type>\[(BASE|UPD(ATE)?|DLC( \d+)?)\])?.*?\.(xci|xcz|nsp|nsz)$', file, re.I)
+    res_id = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])', file)
+    res_ver = re.search(r'(?P<version>\[v\d+\])', file)
     
-    if res is None:
+    if res_id is None or res_ver is None:
         return None
     
-    # define main data
-    title_id = res.group('title_id')[1:-1]
-    version = int(res.group('version')[2:-1])
+    title_id = res_id.group('title_id')[1:-1]
+    version = int(res_ver.group('version')[2:-1])
     title_type = None
     
     if title_id[:-4] == '010000000000':
@@ -43,9 +43,13 @@ def parse_name(file):
     elif title_oei % 2 == 1 and int(title_ext, 16) > 0:
         title_type = 'DLC'
     
-    # can't define title_type
     if title_type is None:
         return None
+    
+    if title_type != 'DLC':
+        title_ext = ''
+    else:
+        title_ext = f'{int(title_ext, 16):04}'
     
     return {
         'title_id': title_id,
@@ -58,6 +62,9 @@ def verify(file):
     try:
         filename = os.path.abspath(file)
         
+        check = True
+        vmsg = list()
+        
         if file.lower().endswith('.xci'):
             f = Fs.factory(Path(filename))
             f.open(filename, 'rb')
@@ -66,16 +73,7 @@ def verify(file):
         elif file.lower().endswith(('.nsp', '.nsz')):
             f = Fs.Nsp.Nsp(filename, 'rb')
         else:
-            return False, {}
-        
-        res = parse_name(file)
-        log_info = f"{file.upper()[-3:]} {res['title_id']} v{round(res['version']/65536)} {res['title_type']}"
-        if res['title_type'] == 'DLC':
-            log_info += f" {str(int(res['title_ext'], 16)).zfill(4)}"
-        print(f'[:INFO:] Verifying... {log_info}\n')
-        
-        vmsg = list()
-        check = True
+            return False, vmsg
         
         check_decrypt, vmsg = verify_decrypt(f, vmsg)
         if check_decrypt == False:
@@ -109,9 +107,6 @@ def verify_decrypt(nspx, vmsg = None):
         vmsg = list()
     
     verdict = True
-    
-    if type(nspx) != Fs.Xci.Xci and type(nspx) != Fs.Nsp.Nsp:
-        return False, msg
     
     tvmsg = '\n[:INFO:] DECRYPTION TEST'
     print(tvmsg)
