@@ -1,2 +1,4 @@
-enlighten
 zstandard
+enlighten
+requests
+pycryptodome
