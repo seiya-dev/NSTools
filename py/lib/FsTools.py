@@ -1,5 +1,14 @@
 from binascii import hexlify as hx, unhexlify as uhx
 from hashlib import sha256, sha1
+from copy import copy
+
+from Fs import Nca
+from lib import FsNcaMod
+
+def get_ncz_data(src_nca):
+    nca = copy(src_nca)
+    nca = FsNcaMod.Nca(nca)
+    return nca
 
 def get_data_from_cnmt(nca):
     crypto1 = nca.header.getCryptoType()

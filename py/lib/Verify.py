@@ -151,13 +151,16 @@ def verify_decrypt(nspx, vmsg = None):
     
     titlerights = list()
     for nca in temp_hfs:
-        if str(nca._path).endswith('.ncz'):
-            nca = Fs.Nca.Nca(nca)
+        rightsId = 0
+        if nca._path.endswith('.ncz'):
+            ncz = FsTools.get_ncz_data(nca)
+            rightsId = ncz.header.getRightsId()
         if type(nca) == Fs.Nca.Nca:
-            if nca.header.getRightsId() != 0:
-                rightsId = hx(nca.header.getRightsId().to_bytes(0x10, byteorder='big')).decode('utf-8').lower()
-                if rightsId not in titlerights:
-                    titlerights.append(rightsId)
+            rightsId = nca.header.getRightsId()
+        if rightsId != 0:
+            rightsId = hx(rightsId.to_bytes(0x10, byteorder='big')).decode('utf-8').lower()
+            if rightsId not in titlerights:
+                titlerights.append(rightsId)
     
     for file in listed_files:
         correct = False
@@ -217,7 +220,7 @@ def verify_decrypt(nspx, vmsg = None):
             elif file.endswith('.ncz'):
                 for f in temp_hfs:
                     if f._path == file:
-                        tncz = Fs.Nca.Nca(f)
+                        tncz = FsTools.get_ncz_data(f)
                         tvmsg = f'\n:{tncz.header.titleId} - Content.{tncz.header.contentType._name_}'
                         print(tvmsg)
                         vmsg.append(tvmsg)
@@ -237,9 +240,8 @@ def verify_decrypt(nspx, vmsg = None):
                             check_tik = VerifyTools.verify_key(temp_hfs, f._path, tik_file)
                             if check_tik == True:
                                 break
-                            break
                     if f._path.endswith('.ncz'):
-                        tncz = Fs.Nca.Nca(f)
+                        tncz = FsTools.get_ncz_data(f)
                         if check_tik == False and tncz.header.getRightsId() != 0:
                             check_tik = 'ncz'
                             break
@@ -475,7 +477,7 @@ def verify_sig(nspx, vmsg = None):
             if verdict == True:
                 verdict = verify['verify']
         if f._path.endswith('.ncz'):
-            ncz = Fs.Nca.Nca(f)
+            ncz = FsTools.get_ncz_data(f)
             ncz._path = f._path
             
             tvmsg = f'\n:{ncz.header.titleId} - Content.{ncz.header.contentType._name_}'
@@ -613,7 +615,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
                 vmsg.append(tvmsg)
         
         if f._path.endswith('ncz'):
-            ncz = Fs.Nca.Nca(f)
+            ncz = FsTools.get_ncz_data(f)
             ncz._path = f._path
             
             origheader = False
@@ -744,18 +746,18 @@ def verify_hash(nspx, headerlist, vmsg = None):
                 sha0 = sha0.hexdigest()
             
             tvmsg = ''
-            tvmsg += f'> FILE: {ncz._path}'
+            tvmsg += f'> FILE: {f._path}'
             tvmsg += f'\n> SHA256: {sha}'
             if origheader != False:
                 tvmsg += f'\n> ORIG_SHA256: {sha0}'
             print(tvmsg)
             vmsg.append(tvmsg)
             
-            if ncz._path[:16] == sha[:16]:
+            if f._path[:16] == sha[:16]:
                 tvmsg = '> FILE IS CORRECT'
                 print(tvmsg)
                 vmsg.append(tvmsg)
-            elif origheader != False and ncz._path[:16] == sha0[:16]:
+            elif origheader != False and f._path[:16] == sha0[:16]:
                 modded = True
                 tvmsg = '> FILE WAS MODIFIED'
                 print(tvmsg)
