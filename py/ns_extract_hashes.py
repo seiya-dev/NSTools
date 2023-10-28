@@ -3,6 +3,7 @@ import sys
 
 from pathlib import Path
 from Fs import Pfs0, Nca, Type, factory
+from lib import FsTools
 
 # set app path
 appPath = Path(sys.argv[0])
@@ -46,7 +47,8 @@ def scan_file():
                     if isinstance(section, Pfs0.Pfs0):
                         Cnmt = section.getCnmt()
                         for entry in Cnmt.contentEntries:
-                            print(f'\n:{Cnmt.titleId} - Content.{Type.Content(entry.type)._name_}')
+                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(byteorder = 'big')))
+                            print(f'\n:{Cnmt.titleId} - Content.{entryType}')
                             print(f'> NCA ID: {entry.ncaId}')
                             print(f'> HASH: {entry.hash.hex()}')
     finally:
