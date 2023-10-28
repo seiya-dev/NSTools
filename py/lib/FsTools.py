@@ -1,8 +1,7 @@
 from binascii import hexlify as hx, unhexlify as uhx
 from hashlib import sha256, sha1
-from copy import copy
 
-from Fs import Nca
+from copy import copy
 from lib import FsNcaMod
 
 def get_ncz_data(src_nca):
@@ -120,7 +119,6 @@ def get_data_from_cnmt(nca):
             
             data['ncaData'] = nca_data
     
-    # print(data)
     return data
 
 def parse_cnmt_type_n(type_n):
