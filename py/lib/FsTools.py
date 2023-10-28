@@ -53,15 +53,6 @@ def get_data_from_cnmt(nca):
             length_of_emeta = cnmt.readInt32()
             content_type_cnmt = cnmt._path[:-22]
             
-            # if content_type_cnmt != 'AddOnContent':
-            #     RSV = min_sversion
-            #     RSV = sq_tools.getFWRangeRSV(int(RSV))
-            #     RGV = 0
-            # else:
-            #     RSV_rq_min=sq_tools.getMinRSV(keygeneration, 0)
-            #     RSV=sq_tools.getFWRangeRSV(int(RSV_rq_min))
-            #     RGV = min_sversion
-            
             cnmt.rewind()
             cnmt.seek(0x20 + offset)
             
@@ -70,7 +61,7 @@ def get_data_from_cnmt(nca):
             cryptoHex = keygeneration.to_bytes(8, 'big').hex().upper()
             data['rightsId'] = data['title_id'] + cryptoHex
             
-            data['hasHtmlManual'] = hasHtmlManual=False
+            data['hasHtmlManual'] = False
             data['installedSize'] = int(nca.header.size)
             data['deltaSize'] = 0
             
