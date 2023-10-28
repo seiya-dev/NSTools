@@ -2,7 +2,7 @@ import os
 import sys
 
 from pathlib import Path
-from Fs import Pfs0, Nca, Type, factory
+from Fs import Ticket, factory
 
 # set app path
 appPath = Path(sys.argv[0])
@@ -32,23 +32,16 @@ def scan_file():
     ipath = os.path.abspath(INCP_PATH)
     if not os.path.isfile(ipath):
         return
-    if not ipath.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
+    if not ipath.lower().endswith(('.nsp', '.nsz')):
         return
     
     container = factory(Path(ipath).resolve())
     container.open(ipath, 'rb')
-    if ipath.lower().endswith(('.xci', '.xcz')):
-        container = container.hfs0['secure']
+    
     try:
         for nspf in container:
-            if isinstance(nspf, Nca.Nca) and nspf.header.contentType == Type.Content.META:
-                for section in nspf:
-                    if isinstance(section, Pfs0.Pfs0):
-                        Cnmt = section.getCnmt()
-                        for entry in Cnmt.contentEntries:
-                            print(f'\n:{Cnmt.titleId} - Content.{Type.Content(entry.type)._name_}')
-                            print(f'> NCA ID: {entry.ncaId}')
-                            print(f'> HASH: {entry.hash.hex()}')
+            if isinstance(nspf, Ticket.Ticket):
+                nspf.printInfo()
     finally:
         container.close()
     
