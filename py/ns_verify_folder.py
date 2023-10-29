@@ -81,7 +81,7 @@ def scan_folder():
         item_path = os.path.join(ipath, item)
         
         findex += 1
-        send_hook(f'[:INFO:] File found ({findex} of {len(files)}): {item}', True)
+        send_hook(f'[:INFO:] File found ({findex} of {len(files)}): {item_path}', True)
         send_hook(f'[:INFO:] Checking filename...')
         
         data = Verify.parse_name(item)
@@ -90,9 +90,8 @@ def scan_folder():
             send_hook(f'{item_path}: BAD NAME')
             with open(lpath_badname, 'a') as f:
                 f.write(f'{item_path}\n')
-            continue
         
-        if re.match(r'^BASE|UPD(ATE)?|DLC|XCI$', fname) is not None:
+        if data is not None and re.match(r'^BASE|UPD(ATE)?|DLC|XCI$', fname) is not None:
             if item.lower().endswith(('.xci', '.xcz')):
                 iscart = True
             else:
@@ -101,16 +100,16 @@ def scan_folder():
                 fname = 'UPD'
             if fname == 'BASE' and data['title_type'] != 'BASE' or fname == 'BASE' and iscart == True:
                 with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item}\n')
+                    f.write(f'{item_path}\n')
             if fname == 'UPD' and data['title_type'] != 'UPD' or fname == 'UPD' and iscart == True:
                 with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item}\n')
+                    f.write(f'{item_path}\n')
             if fname == 'DLC' and data['title_type'] != 'DLC' or fname == 'DLC' and iscart == True:
                 with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item}\n')
+                    f.write(f'{item_path}\n')
             if fname == 'XCI' and iscart == False:
                 with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item}\n')
+                    f.write(f'{item_path}\n')
         
         rootpath = os.path.dirname(item_path)
         basename = os.path.basename(item_path)
@@ -134,7 +133,7 @@ def scan_folder():
                     with open(f'{log_name}-ok.log', 'w') as f:
                         f.write(f'{nspLog}')
         except Exception as e:
-            send_hook(f'[:WARN:] An error occurred:\n{item}: {str(e)}')
+            send_hook(f'[:WARN:] An error occurred:\n{item_path}: {str(e)}')
 
 
 if __name__ == "__main__":
