@@ -122,6 +122,8 @@ class NcaHeader(File):
 			key = self.keyBlock[offset:offset+0x10]
 			#Print.info('dec %d: %s' % (i, hx(key)))
 			self.keys.append(key)
+		
+		self.keyStatus = True
 
 		if self.hasTitleRights():
 			titleRightsTitleId = self.rightsId.decode()[0:16].upper()
@@ -129,7 +131,9 @@ class NcaHeader(File):
 			if titleRightsTitleId in Titles.keys() and Titles.get(titleRightsTitleId).key:
 				self.titleKeyDec = Keys.decryptTitleKey(uhx(Titles.get(titleRightsTitleId).key), self.masterKey)
 			else:
-				Print.info('could not find title key %s!' % titleRightsTitleId)
+				# Print.info('could not find title key %s!' % titleRightsTitleId)
+				self.keyStatus = False
+
 		else:
 			self.titleKeyDec = self.key()
 
@@ -210,7 +214,6 @@ class Nca(File):
 
 	def open(self, file = None, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1):
 		super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
-
 		self.header = NcaHeader()
 		self.partition(0x0, 0xC00, self.header, Fs.Type.Crypto.XTS, uhx(Keys.get('header_key')))
 		#Print.info('partition complete, seeking')
@@ -218,6 +221,8 @@ class Nca(File):
 		#Print.info('reading')
 		#Hex.dump(self.header.read(0x200))
 		#sys.exit()
+		if self.header.keyStatus != True:
+			return
 
 		for i in range(4):
 			hdr = self.header.read(0x200)

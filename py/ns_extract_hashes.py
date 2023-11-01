@@ -1,3 +1,5 @@
+from binascii import hexlify as hx, unhexlify as uhx
+
 import os
 import sys
 

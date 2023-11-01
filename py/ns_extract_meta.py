@@ -51,7 +51,7 @@ def scan_file():
                         
                         titleType = FsTools.parse_cnmt_type_n(hx(Cnmt.titleType.to_bytes(byteorder = 'big')))
                         
-                        print(f':: CNMT: {Cnmt._path}\n')
+                        print(f'\n:: CNMT: {Cnmt._path}\n')
                         print(f'Title ID: {Cnmt.titleId.upper()}')
                         print(f'Version: {Cnmt.version}')
                         print(f'Title Type: {titleType}')

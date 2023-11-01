@@ -120,14 +120,16 @@ def verify_decrypt(nspx, vmsg = None):
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
-            else:
-                for file in nspf:
-                    tvmsg = ''
-                    tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
-                    tvmsg += f'\n> {file._path}\t -> SKIPPED'
-                    tvmsg += f'\n* Partition: {nspf._path}'
-                    print(tvmsg)
-                    vmsg.append(tvmsg)
+            # elif len(nspf.files) > 0:
+            #     tvmsg = ''
+            #     tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
+            #     for file in nspf:
+            #         tab = '\t'
+            #         if not file._path.endswith('cnmt.nca'):
+            #             tab += '\t'
+            #         tvmsg += f'\n> {nspf._path}/{file._path}{tab} -> SKIPPED'
+            #     print(tvmsg)
+            #     vmsg.append(tvmsg)
     
     for file in temp_hfs:
         if file._path.endswith(('.nca','.ncz','.tik')):

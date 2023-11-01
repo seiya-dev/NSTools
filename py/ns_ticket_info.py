@@ -32,11 +32,13 @@ def scan_file():
     ipath = os.path.abspath(INCP_PATH)
     if not os.path.isfile(ipath):
         return
-    if not ipath.lower().endswith(('.nsp', '.nsz')):
+    if not ipath.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
         return
     
     container = factory(Path(ipath).resolve())
     container.open(ipath, 'rb')
+    if ipath.lower().endswith(('.xci', '.xcz')):
+        container = container.hfs0['secure']
     
     try:
         for nspf in container:
