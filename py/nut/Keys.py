@@ -153,25 +153,44 @@ def load(fileName):
 			keyAreaKeys[i][0] = generateKek(key_area_key_application_source, masterKey, aes_kek_generation_source, aes_key_generation_source)
 			keyAreaKeys[i][1] = generateKek(key_area_key_ocean_source, masterKey, aes_kek_generation_source, aes_key_generation_source)
 			keyAreaKeys[i][2] = generateKek(key_area_key_system_source, masterKey, aes_kek_generation_source, aes_key_generation_source)
+		
+		return True
 	except BaseException as e:
 		Print.error(format_exc())
 		Print.error(str(e))
+		
+		return False
 
 
+keyPyPath = Path(sys.argv[0])
+while not keyPyPath.is_dir():
+	keyPyPath = keyPyPath.parents[0]
+keyRootPath = Path(os.path.abspath(os.path.join(str(keyPyPath), '..')))
 
-keyScriptPath = Path(sys.argv[0])
-#While loop to get rid of things like C:\\Python37\\Scripts\\app.exe\\__main__.py
-while not keyScriptPath.is_dir():
-	keyScriptPath = keyScriptPath.parents[0]
-keypath = keyScriptPath.joinpath('keys.txt')
-dumpedKeys = Path.home().joinpath(".switch", "prod.keys")
-if keypath.is_file():
-	load(str(keypath))
-elif dumpedKeys.is_file():
-	load(str(dumpedKeys))
-else:
-	errorMsg = "{0} or {1} not found!\nPlease dump your keys using https://github.com/shchmue/Lockpick_RCM/releases".format(str(keypath), str(dumpedKeys))
+keyfiles = [
+	Path.home().joinpath(".switch", "prod.keys"),
+	Path.home().joinpath(".switch", "keys.txt"),
+	keyRootPath.joinpath("prod.keys"),
+	keyRootPath.joinpath("keys.txt"),
+	keyPyPath.joinpath("prod.keys"),
+	keyPyPath.joinpath("keys.txt"),
+]
+
+loaded = False
+for kf in keyfiles:
+	if kf.is_file():
+		loaded = load(str(kf))
+		if loaded == True:
+			print(f'[:INFO:] Keys Loaded: {str(kf)}')
+			break
+
+if loaded == False:
+	errorMsg = ""
+	for kf in keyfiles:
+		if errorMsg != "":
+			errorMsg += "or "
+		errorMsg += f"{str(kf)} not found\n"
+	errorMsg += "\nPlease dump your keys using https://github.com/shchmue/Lockpick_RCM/releases\n"
 	Print.error(errorMsg)
 	input("Press Enter to exit...")
 	sys.exit(1)
-

@@ -1,4 +1,5 @@
 __pycache__
+smartgit*
 
 *.xci
 *.xcz
@@ -6,4 +7,5 @@ __pycache__
 *.nsz
 
 *.log
+prod.keys
 keys.txt

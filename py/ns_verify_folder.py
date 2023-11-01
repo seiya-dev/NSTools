@@ -29,7 +29,9 @@ INCP_PATH = args.input
 WHOOK_URL = args.webhook_url
 SAVE_VLOG = bool(args.save_log)
 
-def send_hook(message_content, PadPrint = False):
+def send_hook(message_content: str = '', PadPrint: bool = False):
+    if message_content == '':
+        return
     try:
         print_msg = message_content
         if PadPrint == True:
