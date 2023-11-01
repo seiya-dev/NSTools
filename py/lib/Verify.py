@@ -236,20 +236,31 @@ def verify_decrypt(nspx, vmsg = None):
                 tik_file = file
                 check_tik = False
                 
+                tik_data = Fs.Ticket.Ticket()
+                print(tik_data.__dict__)
                 for f in temp_hfs:
-                    if f._path.endswith('.nca'):
-                        if check_tik == False and f.header.getRightsId() != 0:
-                            check_tik = VerifyTools.verify_key(temp_hfs, f._path, tik_file)
-                            if check_tik == True:
-                                break
-                    if f._path.endswith('.ncz'):
-                        tncz = FsTools.get_ncz_data(f)
-                        if check_tik == False and tncz.header.getRightsId() != 0:
-                            check_tik = 'ncz'
-                            break
+                    if f._path.endswith('.tik') and f._path == tik_file:
+                        tik_data = f
+                        break
                 
-                if len(titlerights) < 1:
+                if len(titlerights) < 1 or tik_data.rightsId == 0 or tik_data.rightsId == None:
                     check_tik = 'unused'
+                
+                if check_tik == False:
+                    for f in temp_hfs:
+                        if f._path.endswith('.nca'):
+                            if f.header.getRightsId() == tik_data.rightsId and f.header.keyStatus == False:
+                                check_tik = 'nca'
+                                break
+                            if f.header.getRightsId() == tik_data.rightsId:
+                                check_tik = VerifyTools.verify_key(temp_hfs, f._path, tik_file)
+                                if check_tik == True:
+                                    break
+                        if f._path.endswith('.ncz'):
+                            tncz = FsTools.get_ncz_data(f)
+                            if tncz.header.getRightsId() == tik_data.rightsId:
+                                check_tik = 'ncz'
+                                break
                 
                 cert_file = f'{tik_file[:-3]}cert'
                 if not cert_file in listed_certs:
@@ -286,6 +297,10 @@ def verify_decrypt(nspx, vmsg = None):
                 vmsg.append(tvmsg)
             elif file.endswith('.ncz') and correct == 'ncz':
                 tvmsg = f'> {file}\t\t -> ncz file needs HASH check'
+                print(tvmsg)
+                vmsg.append(tvmsg)
+            elif file.endswith('.tik') and correct == 'nca':
+                tvmsg = f'> {file}\t\t -> is EXISTS'
                 print(tvmsg)
                 vmsg.append(tvmsg)
             elif file.endswith('.tik') and correct == 'ncz':

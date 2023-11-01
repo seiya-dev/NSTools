@@ -188,9 +188,9 @@ if loaded == False:
 	errorMsg = ""
 	for kf in keyfiles:
 		if errorMsg != "":
-			errorMsg += "or "
-		errorMsg += f"{str(kf)} not found\n"
-	errorMsg += "\nPlease dump your keys using https://github.com/shchmue/Lockpick_RCM/releases\n"
+			errorMsg += "\nor "
+		errorMsg += f"{str(kf)}"
+	errorMsg += " not found\n\nPlease dump your keys using https://github.com/shchmue/Lockpick_RCM/releases\n"
 	Print.error(errorMsg)
 	input("Press Enter to exit...")
 	sys.exit(1)
