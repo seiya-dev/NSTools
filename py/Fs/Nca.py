@@ -133,7 +133,6 @@ class NcaHeader(File):
 			else:
 				# Print.info('could not find title key %s!' % titleRightsTitleId)
 				self.keyStatus = False
-
 		else:
 			self.titleKeyDec = self.key()
 
@@ -213,8 +212,8 @@ class Nca(File):
 		return self.sectionFilesystems[key]
 
 	def open(self, file = None, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1):
-		
 		super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
+		
 		self.header = NcaHeader()
 		self.partition(0x0, 0xC00, self.header, Fs.Type.Crypto.XTS, uhx(Keys.get('header_key')))
 		#Print.info('partition complete, seeking')

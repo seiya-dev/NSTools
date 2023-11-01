@@ -237,7 +237,6 @@ def verify_decrypt(nspx, vmsg = None):
                 check_tik = False
                 
                 tik_data = Fs.Ticket.Ticket()
-                print(tik_data.__dict__)
                 for f in temp_hfs:
                     if f._path.endswith('.tik') and f._path == tik_file:
                         tik_data = f
