@@ -174,6 +174,7 @@ keyfiles = [
 	keyRootPath.joinpath("keys.txt"),
 	keyPyPath.joinpath("prod.keys"),
 	keyPyPath.joinpath("keys.txt"),
+	Path(os.environ.get("NSTOOLS_KEYS_FILE", "$NSTOOLS_KEYS_FILE")),
 ]
 
 loaded = False
