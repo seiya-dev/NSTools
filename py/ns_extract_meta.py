@@ -4,8 +4,12 @@ import os
 import sys
 
 from pathlib import Path
-from Fs import Pfs0, Nca, Type, factory
+
+from Fs.Open import factory
+from Fs import Pfs0, Nca, Type
+
 from lib import FsTools
+
 
 # set app path
 appPath = Path(sys.argv[0])
@@ -61,7 +65,6 @@ def scan_file():
                             print(f'\n:{Cnmt.titleId} - Content.{entryType}')
                             print(f'> NCA ID: {entry.ncaId}')
                             print(f'> HASH: {entry.hash.hex()}')
-                        
     finally:
         container.close()
     

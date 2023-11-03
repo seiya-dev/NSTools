@@ -1,23 +1,27 @@
-from nut import aes128
-from nut import Hex
 from binascii import hexlify as hx, unhexlify as uhx
 from struct import pack as pk, unpack as upk
 from hashlib import sha256
+
 import os
 import re
 import pathlib
+
+import nut
+from nut import aes128
+from nut import Hex
 from nut import Keys
 from nut import Print
-import Fs
-import nut
-from Fs.File import File
-from Fs.Rom import Rom
-from Fs.Pfs0 import Pfs0
-from Fs.BaseFs import BaseFs
 from nut import Titles
 
-MEDIA_SIZE = 0x200
+from . import Type
 
+from .File import File
+from .Rom import Rom
+from .Pfs0 import Pfs0
+from .BaseFs import BaseFs
+
+
+MEDIA_SIZE = 0x200
 
 class SectionTableEntry:
 	def __init__(self, d):
@@ -34,10 +38,10 @@ class SectionTableEntry:
 	
 def GetSectionFilesystem(buffer, cryptoKey):
 	fsType = buffer[0x3]
-	if fsType == Fs.Type.Fs.PFS0:
+	if fsType == Type.Fs.PFS0:
 		return Pfs0(buffer, cryptoKey = cryptoKey)
 		
-	if fsType == Fs.Type.Fs.ROMFS:
+	if fsType == Type.Fs.ROMFS:
 		return Rom(buffer, cryptoKey = cryptoKey)
 		
 	return BaseFs(buffer, cryptoKey = cryptoKey)
@@ -74,7 +78,7 @@ class NcaHeader(File):
 		self.contentType = self.readInt8()
 
 		try:
-			self.contentType = Fs.Type.Content(self.contentType)
+			self.contentType = Type.Content(self.contentType)
 		except:
 			pass
 
@@ -215,7 +219,7 @@ class Nca(File):
 		super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
 		
 		self.header = NcaHeader()
-		self.partition(0x0, 0xC00, self.header, Fs.Type.Crypto.XTS, uhx(Keys.get('header_key')))
+		self.partition(0x0, 0xC00, self.header, Type.Crypto.XTS, uhx(Keys.get('header_key')))
 		#Print.info('partition complete, seeking')
 		self.header.seek(0x400)
 		#Print.info('reading')
@@ -259,7 +263,7 @@ class Nca(File):
 		return max(self.header.cryptoType, self.header.cryptoType2)
 
 	def buildId(self):
-		if self.header.contentType != Fs.Type.Content.PROGRAM:
+		if self.header.contentType != Type.Content.PROGRAM:
 			return None
 
 		try:
@@ -298,5 +302,5 @@ class Nca(File):
 			for s in self:
 				s.printInfo(maxDepth, indent+1)
 
-		if self.header.contentType == Fs.Type.Content.PROGRAM:
+		if self.header.contentType == Type.Content.PROGRAM:
 			Print.info(tabs + 'build Id: ' + str(self.buildId()))

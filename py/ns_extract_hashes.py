@@ -4,8 +4,11 @@ import os
 import sys
 
 from pathlib import Path
-from Fs import Pfs0, Nca, Type, factory
+
+from FsNSZ.Open import factory
+from FsNSZ import Pfs0, Nca, Type
 from lib import FsTools
+
 
 # set app path
 appPath = Path(sys.argv[0])

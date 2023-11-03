@@ -1,18 +1,22 @@
-from nut import aes128
-from nut import Hex
 from binascii import hexlify as hx, unhexlify as uhx
 from struct import pack as pk, unpack as upk
-from Fs.File import BaseFile
-from Fs.File import File
 from hashlib import sha256
-from Fs.Pfs0 import Pfs0
-from Fs.BaseFs import BaseFs
+
 import os
 import re
 from pathlib import Path
+
+from nut import aes128
+from nut import Hex
 from nut import Keys
 from nut import Print
-import Fs
+
+from .Open import factory
+from .File import BaseFile
+from .File import File
+from .Pfs0 import Pfs0
+from .BaseFs import BaseFs
+
 
 MEDIA_SIZE = 0x200
 
@@ -129,7 +133,7 @@ class Hfs0(Pfs0):
 
 			self.readInt32() # junk data
 
-			f = Fs.factory(Path(name))
+			f = factory(Path(name))
 
 			f._path = name
 			f.offset = offset

@@ -1,11 +1,14 @@
 from binascii import hexlify as hx, unhexlify as uhx
-from Fs.File import File
-from Fs.File import BaseFile
-from Fs.Hfs0 import Hfs0
-from Fs.Hfs0 import Hfs0Stream
+
 import os
 import re
+
 from nut import Print
+
+from .File import File
+from .File import BaseFile
+from .Hfs0 import Hfs0
+from .Hfs0 import Hfs0Stream
 
 
 MEDIA_SIZE = 0x200
@@ -319,4 +322,3 @@ class Xci(File):
 		Print.info(tabs + 'gamecardCert = ' + str(hx(self.gamecardCert.magic + self.gamecardCert.unknown1 + self.gamecardCert.unknown2 + self.gamecardCert.data)))
 
 		self.hfs0.printInfo(maxDepth, indent)
-

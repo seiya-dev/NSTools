@@ -1,37 +1,38 @@
-import Fs.Nsp
-import Fs.Xci
-import Fs.Nca
-import Fs.Nacp
-import Fs.Ticket
-import Fs.Cnmt
-import Fs.File
-
 def factory(name):
+	from .Nsp import Nsp
+	from .Xci import Xci
+	from .Hfs0 import Hfs0
+	from .Nca import Nca
+	from .Nacp import Nacp
+	from .Ticket import Ticket
+	from .Cnmt import Cnmt
+	from .File import File
+	
 	if name.suffix == '.xci':
-		f = Fs.Xci.Xci()
+		f = Xci()
 	elif name.suffix == '.xcz':
-		f = Fs.Xci.Xci()
+		f = Xci()
 	elif name.suffix == '.nsp':
-		f = Fs.Nsp.Nsp()
+		f = Nsp()
 	elif name.suffix == '.nsz':
-		f = Fs.Nsp.Nsp()
+		f = Nsp()
 	elif name.suffix == '.nspz':
-		f = Fs.Nsp.Nsp()
+		f = Nsp()
 	elif name.suffix == '.nsx':
-		f = Fs.Nsp.Nsp()
+		f = Nsp()
 	elif name.suffix == '.nca':
-		f = Fs.Nca.Nca()
+		f = Nca()
 	elif name.suffix == '.ncz':
-		f = Fs.File.File()
+		f = File()
 	elif name.suffix == '.nacp':
-		f = Fs.Nacp.Nacp()
+		f = Nacp()
 	elif name.suffix == '.tik':
-		f = Fs.Ticket.Ticket()
+		f = Ticket()
 	elif name.suffix == '.cnmt':
-		f = Fs.Cnmt.Cnmt()
+		f = Cnmt()
 	elif str(name) in set(['normal', 'logo', 'update', 'secure']):
-		f = Fs.Hfs0.Hfs0(None)
+		f = Hfs0(None)
 	else:
-		f = Fs.File.File()
+		f = File()
 
 	return f

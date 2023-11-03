@@ -5,18 +5,22 @@ import os
 import sys
 import re
 
-import Fs
 from pathlib import Path
 
-import zstandard
-from lib import FsTools
-from lib import VerifyTools
-from lib import Header, BlockDecompressorReader
-from lib.FsCert import PublicCert
+from . import FsTools
+from . import VerifyTools
+from . import Header, BlockDecompressorReader
+from .FsCert import PublicCert
 
+import zstandard
 import enlighten
 
-def parse_name(file):
+import Fs
+
+from Fs.Open import factory
+from Fs import Xci, Nsp
+
+def parse_name(file: str):
     res_id = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])', file)
     res_ver = re.search(r'(?P<version>\[v\d+\])', file)
     
@@ -58,7 +62,7 @@ def parse_name(file):
         'version': version,
     }
 
-def verify(file):
+def verify(file: str):
     try:
         filename = os.path.abspath(file)
         
@@ -66,12 +70,12 @@ def verify(file):
         vmsg = list()
         
         if file.lower().endswith('.xci'):
-            f = Fs.factory(Path(filename))
+            f = factory(Path(filename))
             f.open(filename, 'rb')
         elif file.lower().endswith('.xcz'):
-            f = Fs.Xci.Xci(filename)
+            f = Xci.Xci(filename)
         elif file.lower().endswith(('.nsp', '.nsz')):
-            f = Fs.Nsp.Nsp(filename, 'rb')
+            f = Nsp.Nsp(filename, 'rb')
         else:
             return False, vmsg
         
@@ -115,21 +119,11 @@ def verify_decrypt(nspx, vmsg = None):
     temp_hfs = nspx
     isCard = False
     
-    if(type(nspx) == Fs.Xci.Xci):
+    if(type(nspx) == Xci.Xci):
         for nspf in nspx.hfs0:
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
-            # elif len(nspf.files) > 0:
-            #     tvmsg = ''
-            #     tvmsg += f'\n:0000000000000000 - Content.UNKNOWN'
-            #     for file in nspf:
-            #         tab = '\t'
-            #         if not file._path.endswith('cnmt.nca'):
-            #             tab += '\t'
-            #         tvmsg += f'\n> {nspf._path}/{file._path}{tab} -> SKIPPED'
-            #     print(tvmsg)
-            #     vmsg.append(tvmsg)
     
     for file in temp_hfs:
         if file._path.endswith(('.nca','.ncz','.tik')):

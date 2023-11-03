@@ -1,23 +1,26 @@
 from binascii import hexlify as hx, unhexlify as uhx
 from hashlib import sha256, sha1
 
-import Fs
-import io
-
-from lib import Hex
-from nut import Keys
-from nut import aes128
-
-import zstandard
-from lib import FsTools
-from lib import Header, BlockDecompressorReader
-from lib.NcaKeys import getNcaModulusKey
-
 from Crypto.Hash import SHA256
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
+
+import io
+
+from nut import Keys
+from nut import aes128
+
+from . import Hex
+from . import FsTools
+from . import Header, BlockDecompressorReader
+from .NcaKeys import getNcaModulusKey
+
+import zstandard
+
+import Fs
+
 
 RSA_PUBLIC_EXPONENT = 0x10001
 FS_HEADER_LENGTH = 0x200

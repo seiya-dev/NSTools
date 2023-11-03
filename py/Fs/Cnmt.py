@@ -1,6 +1,8 @@
-from Fs.File import File
 from binascii import hexlify as hx, unhexlify as uhx
+
 from nut import Print, Keys
+
+from .File import File
 
 
 class MetaEntry:

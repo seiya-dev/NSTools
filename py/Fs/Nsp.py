@@ -1,23 +1,28 @@
-from nut import aes128
-from nut import Hex
 from binascii import hexlify as hx, unhexlify as uhx
 from struct import pack as pk, unpack as upk
-from Fs.File import File
 from hashlib import sha256
-import Fs
+
 import os
 import re
 import pathlib
+
+import enlighten
+
+from nut import aes128
+from nut import Hex
 from nut import Keys
 from nut import Print
-from Fs.Pfs0 import Pfs0
-from Fs.Ticket import Ticket
-from Fs.Nca import Nca
-import enlighten
-import shutil
+
 from nut import Titles
 from nut import Titles as Title
+
 from lib.PathTools import *
+
+from .File import File
+from .Pfs0 import Pfs0
+from .Ticket import Ticket
+from .Nca import Nca
+
 
 MEDIA_SIZE = 0x200
 
@@ -445,3 +450,4 @@ class Nsp(Pfs0):
 				success = False
 
 		return success
+
