@@ -15,10 +15,11 @@ from .FsCert import PublicCert
 import zstandard
 import enlighten
 
-import Fs
-
+# import Fs
 from Fs.Open import factory
 from Fs import Xci, Nsp
+from Fs import Nca, Ticket
+from Fs import Type
 
 def parse_name(file: str):
     res_id = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])', file)
@@ -128,11 +129,11 @@ def verify_decrypt(nspx, vmsg = None):
     for file in temp_hfs:
         if file._path.endswith(('.nca','.ncz','.tik')):
             listed_files.append(file._path)
-        if type(file) == Fs.Nca.Nca:
+        if type(file) == Nca.Nca:
             valid_files.append(file._path)
         if file._path.endswith('.ncz'):
             valid_files.append(file._path)
-        if type(file) == Fs.Ticket.Ticket:
+        if type(file) == Ticket.Ticket:
             valid_files.append(file._path)
         if file._path.endswith('.cert'):
             listed_certs.append(file._path)
@@ -151,7 +152,7 @@ def verify_decrypt(nspx, vmsg = None):
         if nca._path.endswith('.ncz'):
             ncz = FsTools.get_ncz_data(nca)
             rightsId = ncz.header.getRightsId()
-        if type(nca) == Fs.Nca.Nca:
+        if type(nca) == Nca.Nca:
             rightsId = nca.header.getRightsId()
         if rightsId != 0:
             rightsId = hx(rightsId.to_bytes(0x10, byteorder='big')).decode('utf-8').lower()
@@ -184,9 +185,9 @@ def verify_decrypt(nspx, vmsg = None):
                         tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
                         print(tvmsg)
                         vmsg.append(tvmsg)
-                        if f.header.contentType != Fs.Type.Content.PROGRAM:
+                        if f.header.contentType != Type.Content.PROGRAM:
                             correct = VerifyTools.verify_enforcer(f)
-                            if correct == True and f.header.contentType == Fs.Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
+                            if correct == True and f.header.contentType == Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
                                 correct = VerifyTools.pr_noenc_check_dlc(f)
                                 if correct == False:
                                     bad_dec = True
@@ -230,7 +231,7 @@ def verify_decrypt(nspx, vmsg = None):
                 tik_file = file
                 check_tik = False
                 
-                tik_data = Fs.Ticket.Ticket()
+                tik_data = Ticket.Ticket()
                 for f in temp_hfs:
                     if f._path.endswith('.tik') and f._path == tik_file:
                         tik_data = f
@@ -339,8 +340,8 @@ def verify_decrypt(nspx, vmsg = None):
             vmsg.append(cert_message)
     
     for nca in temp_hfs:
-        if type(nca) == Fs.Nca.Nca:
-            if nca.header.contentType == Fs.Type.Content.META:
+        if type(nca) == Nca.Nca:
+            if nca.header.contentType == Type.Content.META:
                 for f in nca:
                     for cnmt in f:
                         nca.rewind()
@@ -394,7 +395,7 @@ def verify_decrypt(nspx, vmsg = None):
     
     ticket_list = list()
     for ticket in temp_hfs:
-        if type(ticket) == Fs.Ticket.Ticket:
+        if type(ticket) == Ticket.Ticket:
             ticket_list.append(ticket._path)
     
     for rightsId in titlerights:
@@ -443,14 +444,14 @@ def verify_sig(nspx, vmsg = None):
     temp_hfs = nspx
     isCard = False
     
-    if(type(nspx) == Fs.Xci.Xci):
+    if(type(nspx) == Xci.Xci):
         for nspf in nspx.hfs0:
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
     
     for f in temp_hfs:
-        if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.META:
+        if type(f) == Nca.Nca and f.header.contentType == Type.Content.META:
             verify = VerifyTools.verify_nca_sig_simple(f)
             if verify['verify'] == True:
                 meta = FsTools.get_data_from_cnmt(f)
@@ -458,7 +459,7 @@ def verify_sig(nspx, vmsg = None):
                     hashlist[nca['ncaId']] = nca['hash']
     
     for f in temp_hfs:
-        if type(f) == Fs.Nca.Nca:
+        if type(f) == Nca.Nca:
             tvmsg = f'\n:{f.header.titleId} - Content.{f.header.contentType._name_}'
             print(tvmsg)
             vmsg.append(tvmsg)
@@ -472,7 +473,7 @@ def verify_sig(nspx, vmsg = None):
             headerlist.append([verify['ncaname'],verify['origheader'],listedhash])
             
             tabs = '\t'
-            if f.header.contentType != Fs.Type.Content.META:
+            if f.header.contentType != Type.Content.META:
                 tabs += '\t'
             
             if verify['verify'] == True:
@@ -487,14 +488,14 @@ def verify_sig(nspx, vmsg = None):
             if verdict == True:
                 verdict = verify['verify']
         if f._path.endswith('.ncz'):
-            ncz = FsTools.get_ncz_data(f)
-            ncz._path = f._path
+            tncz = FsTools.get_ncz_data(f)
+            tncz._path = f._path
             
-            tvmsg = f'\n:{ncz.header.titleId} - Content.{ncz.header.contentType._name_}'
+            tvmsg = f'\n:{ncz.header.titleId} - Content.{tncz.header.contentType._name_}'
             print(tvmsg)
             vmsg.append(tvmsg)
             
-            verify = VerifyTools.verify_nca_sig_simple(ncz)
+            verify = VerifyTools.verify_nca_sig_simple(tncz)
             
             listedhash = False
             if verify['verify'] != True and verify['ncaname'][:32] in hashlist:
@@ -503,11 +504,11 @@ def verify_sig(nspx, vmsg = None):
             headerlist.append([verify['ncaname'],verify['origheader'],listedhash])
             
             if verify['verify'] == True:
-                tvmsg = f'> {ncz._path}\t\t -> is PROPER'
+                tvmsg = f'> {tncz._path}\t\t -> is PROPER'
                 print(tvmsg)
                 vmsg.append(tvmsg)
             else:
-                tvmsg = f'> {ncz._path}\t\t -> was MODIFIED'
+                tvmsg = f'> {tncz._path}\t\t -> was MODIFIED'
                 print(tvmsg)
                 vmsg.append(tvmsg)
             
@@ -540,14 +541,14 @@ def verify_hash(nspx, headerlist, vmsg = None):
     temp_hfs = nspx
     isCard = False
     
-    if(type(nspx) == Fs.Xci.Xci):
+    if(type(nspx) == Xci.Xci):
         for nspf in nspx.hfs0:
             if nspf._path == 'secure':
                 temp_hfs = nspf
                 isCard = True
     
     for f in temp_hfs:
-        if type(f) == Fs.Nca.Nca:
+        if type(f) == Nca.Nca:
             origheader = False
             listedhash = False
             for i in range(len(headerlist)):
