@@ -49,7 +49,7 @@ def scan_file():
                     if isinstance(section, Pfs0.Pfs0):
                         Cnmt = section.getCnmt()
                         
-                        titleType = FsTools.parse_cnmt_type_n(hx(Cnmt.titleType.to_bytes(byteorder = 'big')))
+                        titleType = FsTools.parse_cnmt_type_n(hx(Cnmt.titleType.to_bytes(length=(min(Cnmt.titleType.bit_length(), 1) + 7) // 8, byteorder = 'big')))
                         
                         print(f'\n:: CNMT: {Cnmt._path}\n')
                         print(f'Title ID: {Cnmt.titleId.upper()}')
@@ -57,8 +57,7 @@ def scan_file():
                         print(f'Title Type: {titleType}')
                         
                         for entry in Cnmt.contentEntries:
-                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(byteorder = 'big')))
-                            print(f'\n:{Cnmt.titleId} - Content.{entryType}')
+                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(length=(min(entry.type.bit_length(), 1) + 7) // 8, byteorder = 'big')))                            print(f'\n:{Cnmt.titleId} - Content.{entryType}')
                             print(f'> NCA ID: {entry.ncaId}')
                             print(f'> HASH: {entry.hash.hex()}')
                         

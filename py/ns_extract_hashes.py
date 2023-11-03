@@ -49,7 +49,7 @@ def scan_file():
                     if isinstance(section, Pfs0.Pfs0):
                         Cnmt = section.getCnmt()
                         for entry in Cnmt.contentEntries:
-                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(byteorder = 'big')))
+                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(length=(min(entry.type.bit_length(), 1) + 7) // 8, byteorder = 'big')))
                             print(f'\n:{Cnmt.titleId} - Content.{entryType}')
                             print(f'> NCA ID: {entry.ncaId}')
                             print(f'> HASH: {entry.hash.hex()}')
