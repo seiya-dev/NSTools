@@ -29,6 +29,11 @@ INCP_PATH = args.input
 WHOOK_URL = args.webhook_url
 SAVE_VLOG = bool(args.save_log)
 
+Verify.VerifyTools.Keys.load_default()
+if not Verify.VerifyTools.Keys.keys_loaded:
+    input("Press Enter to exit...")
+    sys.exit(1)
+
 def send_hook(message_content: str = '', PadPrint: bool = False):
     if message_content == '':
         return

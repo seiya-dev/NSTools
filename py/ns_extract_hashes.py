@@ -25,6 +25,11 @@ args = parser.parse_args()
 
 INCP_PATH = args.input
 
+Pfs0.Keys.load_default()
+if not Pfs0.Keys.keys_loaded:
+    input("Press Enter to exit...")
+    sys.exit(1)
+
 def send_hook(message_content):
     try:
         print(message_content)
