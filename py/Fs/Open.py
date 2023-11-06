@@ -1,38 +1,27 @@
 def factory(name):
-	from .Nsp import Nsp
-	from .Xci import Xci
-	from .Hfs0 import Hfs0
-	from .Nca import Nca
-	from .Nacp import Nacp
-	from .Ticket import Ticket
-	from .Cnmt import Cnmt
-	from .File import File
-	
-	if name.suffix == '.xci':
+	if name.suffix == '.xci' or name.suffix == '.xcz':
+		from .Xci import Xci
 		f = Xci()
-	elif name.suffix == '.xcz':
-		f = Xci()
-	elif name.suffix == '.nsp':
-		f = Nsp()
-	elif name.suffix == '.nsz':
-		f = Nsp()
-	elif name.suffix == '.nspz':
-		f = Nsp()
-	elif name.suffix == '.nsx':
+	elif name.suffix == '.nsp' or name.suffix == '.nsz' or name.suffix == '.nspz' or name.suffix == '.nsx':
+		from .Nsp import Nsp
 		f = Nsp()
 	elif name.suffix == '.nca':
+		from .Nca import Nca
 		f = Nca()
-	elif name.suffix == '.ncz':
-		f = File()
 	elif name.suffix == '.nacp':
+		from .Nacp import Nacp
 		f = Nacp()
 	elif name.suffix == '.tik':
+		from .Ticket import Ticket
 		f = Ticket()
 	elif name.suffix == '.cnmt':
+		from .Cnmt import Cnmt
 		f = Cnmt()
 	elif str(name) in set(['normal', 'logo', 'update', 'secure']):
+		from .Hfs0 import Hfs0
 		f = Hfs0(None)
 	else:
+		from .File import File
 		f = File()
 
 	return f

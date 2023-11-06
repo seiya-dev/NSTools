@@ -19,8 +19,9 @@ from .NcaKeys import getNcaModulusKey
 
 import zstandard
 
-import Fs
-
+# import Fs
+from Fs import Nca
+from Fs import Type
 
 RSA_PUBLIC_EXPONENT = 0x10001
 FS_HEADER_LENGTH = 0x200
@@ -63,9 +64,9 @@ def verify_nca_key(self, nca):
     return check, titleKey
 
 def verify_enforcer(f):
-    if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.PROGRAM:
+    if type(f) == Nca.Nca and f.header.contentType == Type.Content.PROGRAM:
         for fs in f.sectionFilesystems:
-            if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
+            if fs.fsType == Type.Fs.PFS0 and fs.cryptoType == Type.Crypto.CTR:
                 f.seek(0)
                 ncaHeader = f.read(0x400)
                 sectionHeaderBlock = fs.buffer
@@ -74,9 +75,9 @@ def verify_enforcer(f):
                 return True
             else:
                 return False
-    if type(f) == Fs.Nca.Nca and f.header.contentType == Fs.Type.Content.META:
+    if type(f) == Nca.Nca and f.header.contentType == Type.Content.META:
         for fs in f.sectionFilesystems:
-            if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
+            if fs.fsType == Type.Fs.PFS0 and fs.cryptoType == Type.Crypto.CTR:
                 f.seek(0)
                 ncaHeader = f.read(0x400)
                 sectionHeaderBlock = fs.buffer
@@ -85,9 +86,9 @@ def verify_enforcer(f):
                 return True
             else:
                 return False
-    if type(f) == Fs.Nca.Nca:
+    if type(f) == Nca.Nca:
         for fs in f.sectionFilesystems:
-            if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.CTR or f.header.contentType == Fs.Type.Content.MANUAL or f.header.contentType == Fs.Type.Content.DATA:
+            if fs.fsType == Type.Fs.ROMFS and fs.cryptoType == Type.Crypto.CTR or f.header.contentType == Type.Content.MANUAL or f.header.contentType == Type.Content.DATA:
                 f.seek(0)
                 ncaHeader = f.read(0x400)
                 sectionHeaderBlock = fs.buffer
@@ -160,7 +161,7 @@ def verify_ncz(self, target):
 
 def verify_key(self, nca, ticket):
     for file in self:
-        if type(file) == Fs.Nca.Nca and file._path == nca:
+        if type(file) == Nca.Nca and file._path == nca:
             crypto1 = file.header.getCryptoType()
             crypto2 = file.header.getCryptoType2()
             if crypto1 == 2 and crypto1 > crypto2:
@@ -180,13 +181,13 @@ def verify_key(self, nca, ticket):
     
     for f in self:
         if f._path == nca:
-            if type(f) == Fs.Nca.Nca and f.header.getRightsId() != 0:
+            if type(f) == Nca.Nca and f.header.getRightsId() != 0:
                 for fs in f.sectionFilesystems:
-                    if fs.fsType == Fs.Type.Fs.PFS0 and fs.cryptoType == Fs.Type.Crypto.CTR:
+                    if fs.fsType == Type.Fs.PFS0 and fs.cryptoType == Type.Crypto.CTR:
                         f.seek(0)
                         
-                        ncaHeader = Fs.Nca.NcaHeader()
-                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Fs.Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader = Nca.NcaHeader()
+                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
                         
                         pfs0 = fs
                         
@@ -197,25 +198,25 @@ def verify_key(self, nca, ticket):
                         pfs0Header = f.read(0x10)
                         
                         if sectionHeaderBlock[8:12] == b'IVFC':
-                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
                                 return True
                             else:
                                 return False
                         else:
-                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             magic = mem.read()[0:4]
                             if magic != b'PFS0':
                                 pass
                             else:
                                 return True
-                    if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.CTR:
+                    if fs.fsType == Type.Fs.ROMFS and fs.cryptoType == Type.Crypto.CTR:
                         f.seek(0)
                         
-                        ncaHeader = Fs.Nca.NcaHeader()
-                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Fs.Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader = Nca.NcaHeader()
+                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
                         ncaHeader = f.read(0x400)
                         
                         pfs0 = fs
@@ -229,25 +230,25 @@ def verify_key(self, nca, ticket):
                         pfs0Header = f.read(levelSize)
                         
                         if sectionHeaderBlock[8:12] == b'IVFC':
-                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
                                 return True
                             else:
                                 return False
                         else:
-                            mem = Fs.File.MemoryFile(pfs0Header, Fs.Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             magic = mem.read()[0:4]
                             if magic != b'PFS0':
                                 return False
                             else:
                                 return True
-                    if fs.fsType == Fs.Type.Fs.ROMFS and fs.cryptoType == Fs.Type.Crypto.BKTR and f.header.contentType == Fs.Type.Content.PROGRAM:
+                    if fs.fsType == Type.Fs.ROMFS and fs.cryptoType == Type.Crypto.BKTR and f.header.contentType == Type.Content.PROGRAM:
                         f.seek(0)
                         
-                        ncaHeader = Fs.Nca.NcaHeader()
-                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Fs.Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader = Nca.NcaHeader()
+                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
                         ncaHeader = f.read(0x400)
                         
                         pfs0 = fs
@@ -281,7 +282,7 @@ def pr_noenc_check(self):
                     break
         if check == False:
             for f in self:
-                if f.fsType == Fs.Type.Fs.ROMFS and f.cryptoType == Fs.Type.Crypto.CTR:
+                if f.fsType == Type.Fs.ROMFS and f.cryptoType == Type.Crypto.CTR:
                     if f.magic == b'IVFC':
                         check = True
     
@@ -300,8 +301,8 @@ def pr_noenc_check_dlc(self):
     
     decKey = Keys.decryptTitleKey(self.header.titleKeyDec, Keys.getMasterKeyIndex(masterKeyRev))
     for f in self.sectionFilesystems:
-        if f.fsType == Fs.Type.Fs.ROMFS and f.cryptoType == Fs.Type.Crypto.CTR:
-            ncaHeader = Fs.Nca.NcaHeader()
+        if f.fsType == Type.Fs.ROMFS and f.cryptoType == Type.Crypto.CTR:
+            ncaHeader = Nca.NcaHeader()
             self.header.rewind()
             ncaHeader = self.header.read(0x400)
 

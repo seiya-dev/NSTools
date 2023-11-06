@@ -491,7 +491,7 @@ def verify_sig(nspx, vmsg = None):
             tncz = FsTools.get_ncz_data(f)
             tncz._path = f._path
             
-            tvmsg = f'\n:{ncz.header.titleId} - Content.{tncz.header.contentType._name_}'
+            tvmsg = f'\n:{tncz.header.titleId} - Content.{tncz.header.contentType._name_}'
             print(tvmsg)
             vmsg.append(tvmsg)
             
