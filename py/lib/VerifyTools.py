@@ -20,8 +20,10 @@ from .NcaKeys import getNcaModulusKey
 import zstandard
 
 # import Fs
-from Fs import Nca
 from Fs import Type
+from Fs import File
+from Fs import Nca
+from Fs import Ticket
 
 RSA_PUBLIC_EXPONENT = 0x10001
 FS_HEADER_LENGTH = 0x200
@@ -170,7 +172,7 @@ def verify_key(self, nca, ticket):
                 masterKeyRev = file.header.getCryptoType2()
     
     for file in self:
-        if type(file) == Fs.Ticket.Ticket:
+        if type(file) == Ticket.Ticket:
             if ticket == None:
                 ticket = file._path
             if file._path == ticket:
@@ -198,14 +200,14 @@ def verify_key(self, nca, ticket):
                         pfs0Header = f.read(0x10)
                         
                         if sectionHeaderBlock[8:12] == b'IVFC':
-                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
                                 return True
                             else:
                                 return False
                         else:
-                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             magic = mem.read()[0:4]
                             if magic != b'PFS0':
@@ -230,14 +232,14 @@ def verify_key(self, nca, ticket):
                         pfs0Header = f.read(levelSize)
                         
                         if sectionHeaderBlock[8:12] == b'IVFC':
-                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             if hx(sectionHeaderBlock[0xc8:0xc8+0x20]).decode('utf-8') == str(sha256(data).hexdigest()):
                                 return True
                             else:
                                 return False
                         else:
-                            mem = Fs.File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
+                            mem = File.MemoryFile(pfs0Header, Type.Crypto.CTR, titleKeyDec, pfs0.cryptoCounter, offset = pfs0Offset)
                             data = mem.read()
                             magic = mem.read()[0:4]
                             if magic != b'PFS0':
@@ -276,7 +278,7 @@ def pr_noenc_check(self):
     
     for f in self:
         for g in f:
-            if type(g) == Fs.File.File:
+            if type(g) == File.File:
                 if g._path == 'main.npdm':
                     check = True
                     break
