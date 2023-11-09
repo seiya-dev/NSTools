@@ -1,4 +1,6 @@
 __pycache__
+*.egg-info
+/py/dist
 smartgit*
 
 /logs
