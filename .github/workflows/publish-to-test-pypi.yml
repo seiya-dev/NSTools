@@ -15,15 +15,17 @@ jobs:
         python-version: "3.x"
     - name: Install pypa/build
       run: |
+        cd py
         python3 -m pip install build --user
     - name: Build a binary wheel and a source tarball
       run: |
+        cd py
         python3 -m build
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
       with:
         name: python-package-distributions
-        path: dist/
+        path: py/dist/
 
   publish-to-pypi:
     name: >-
@@ -43,7 +45,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: python-package-distributions
-        path: dist/
+        path: py/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 
@@ -64,13 +66,13 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: python-package-distributions
-        path: dist/
+        path: py/dist/
     - name: Sign the dists with Sigstore
       uses: sigstore/gh-action-sigstore-python@v1.2.3
       with:
         inputs: >-
-          ./dist/*.tar.gz
-          ./dist/*.whl
+          ./py/dist/*.tar.gz
+          ./py/dist/*.whl
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -108,7 +110,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: python-package-distributions
-        path: dist/
+        path: py/dist/
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

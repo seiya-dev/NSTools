@@ -9,8 +9,8 @@ from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
 
 import io
 
-from nut import Keys
-from nut import aes128
+from nstools.nut import Keys
+from nstools.nut import aes128
 
 from . import Hex
 from . import FsTools
@@ -19,11 +19,11 @@ from .NcaKeys import getNcaModulusKey
 
 import zstandard
 
-# import Fs
-from Fs import Type
-from Fs import File
-from Fs import Nca
-from Fs import Ticket
+from nstools.Fs import Type
+from nstools.Fs import File
+from nstools.Fs import Nca
+from nstools.Fs import Ticket
+
 
 RSA_PUBLIC_EXPONENT = 0x10001
 FS_HEADER_LENGTH = 0x200

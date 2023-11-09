@@ -1,6 +1,6 @@
 from binascii import hexlify as hx, unhexlify as uhx
 
-from nut import Print
+from nstools.nut import Print
 
 from . import Bktr
 from . import Type

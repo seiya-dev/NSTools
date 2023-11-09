@@ -1,11 +1,11 @@
 import os, sys, re
 from traceback import format_exc
-from nut import aes128
 from binascii import crc32, hexlify as hx, unhexlify as uhx
-from nut import Print
 from pathlib import Path
-# from multiprocessing import *
 from multiprocessing.process import current_process
+
+from . import aes128
+from . import Print
 
 keys = {}
 titleKeks = []

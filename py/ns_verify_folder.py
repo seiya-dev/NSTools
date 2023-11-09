@@ -6,9 +6,9 @@ import re
 
 from pathlib import Path
 
-from nut import Keys
+from .nut import Keys
 
-from lib import Verify
+from .lib import Verify
 
 # set app path
 appPath = Path(sys.argv[0])
