@@ -5,6 +5,8 @@ import sys
 
 from pathlib import Path
 
+from nut import Keys
+
 from Fs import factory
 from Fs import Pfs0, Nca, Type
 
@@ -29,8 +31,8 @@ args = parser.parse_args()
 
 INCP_PATH = args.input
 
-Pfs0.Keys.load_default()
-if not Pfs0.Keys.keys_loaded:
+Keys.load_default()
+if not Keys.keys_loaded:
     input("Press Enter to exit...")
     sys.exit(1)
 
