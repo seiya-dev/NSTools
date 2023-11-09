@@ -1,7 +1,0 @@
-[build-system]
-requires = ["setuptools", "zstandard", "enlighten", "pycryptodome", "requests"]
-
-[project]
-name = 'nstools'
-requires-python = ">=3.10"
-version = "1.0.7"
