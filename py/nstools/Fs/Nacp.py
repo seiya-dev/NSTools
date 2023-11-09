@@ -1,8 +1,8 @@
 from binascii import hexlify as hx, unhexlify as uhx
 from enum import IntEnum
 
-from nut import Print
-from nut import Keys
+from nstools.nut import Print
+from nstools.nut import Keys
 
 from .File import File
 

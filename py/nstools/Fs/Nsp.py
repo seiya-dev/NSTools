@@ -8,15 +8,15 @@ import pathlib
 
 import enlighten
 
-from nut import aes128
-from nut import Hex
-from nut import Keys
-from nut import Print
+from nstools.nut import aes128
+from nstools.nut import Hex
+from nstools.nut import Keys
+from nstools.nut import Print
 
-from nut import Titles
-from nut import Titles as Title
+from nstools.nut import Titles
+from nstools.nut import Titles as Title
 
-from lib.PathTools import *
+from nstools.lib.PathTools import *
 
 from .File import File
 from .Pfs0 import Pfs0

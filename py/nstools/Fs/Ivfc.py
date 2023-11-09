@@ -6,10 +6,10 @@ import os
 import re
 import pathlib
 
-from nut import aes128
-from nut import Hex
-from nut import Keys
-from nut import Print
+from nstools.nut import aes128
+from nstools.nut import Hex
+from nstools.nut import Keys
+from nstools.nut import Print
 
 from .File import File
 

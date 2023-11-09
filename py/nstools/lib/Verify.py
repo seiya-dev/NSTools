@@ -15,11 +15,11 @@ from .FsCert import PublicCert
 import zstandard
 import enlighten
 
-# import Fs
-from Fs import factory
-from Fs import Xci, Nsp
-from Fs import Nca, Ticket
-from Fs import Type
+from nstools.Fs import factory
+from nstools.Fs import Xci, Nsp
+from nstools.Fs import Nca, Ticket
+from nstools.Fs import Type
+
 
 def parse_name(file: str):
     res_id = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])', file)

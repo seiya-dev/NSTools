@@ -5,9 +5,9 @@ import os
 import re
 import pathlib
 
-from nut import Keys
-from nut import Print
-from nut import Hex
+from nstools.nut import Keys
+from nstools.nut import Print
+from nstools.nut import Hex
 
 from .File import File
 from .File import MemoryFile

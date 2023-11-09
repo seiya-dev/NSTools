@@ -3,7 +3,7 @@ from binascii import hexlify as hx, unhexlify as uhx
 import os
 import re
 
-from nut import Print
+from nstools.nut import Print
 
 from .File import File
 from .File import BaseFile

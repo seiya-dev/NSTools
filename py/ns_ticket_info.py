@@ -2,7 +2,10 @@ import os
 import sys
 
 from pathlib import Path
-from Fs import Ticket, factory
+
+from nstools.nut import Keys
+
+from nstools.Fs import factory, Ticket
 
 # set app path
 appPath = Path(sys.argv[0])
@@ -21,6 +24,11 @@ parser.add_argument('-i', '--input',  help = 'input file')
 args = parser.parse_args()
 
 INCP_PATH = args.input
+
+Keys.load_default()
+if not Keys.keys_loaded:
+    input("Press Enter to exit...")
+    sys.exit(1)
 
 def send_hook(message_content):
     try:

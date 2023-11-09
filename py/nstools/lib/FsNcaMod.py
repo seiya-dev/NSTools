@@ -6,19 +6,14 @@ import os
 import re
 import pathlib
 
-import nut
-from nut import aes128
-from nut import Hex
-from nut import Keys
-from nut import Print
-from nut import Titles
+from nstools.nut import aes128
+from nstools.nut import Hex
+from nstools.nut import Keys
+from nstools.nut import Print
+from nstools.nut import Titles
 
-from . import Type
-
-from .File import File
-from .Rom import Rom
-from .Pfs0 import Pfs0
-from .BaseFs import BaseFs
+from nstools.Fs import Type
+from nstools.Fs.File import File
 
 
 MEDIA_SIZE = 0x200
@@ -34,18 +29,8 @@ class SectionTableEntry:
 		self.unknown1 = int.from_bytes(d[0x8:0xc], byteorder='little', signed=False)
 		self.unknown2 = int.from_bytes(d[0xc:0x10], byteorder='little', signed=False)
 		self.sha1 = None
-		
-	
-def GetSectionFilesystem(buffer, cryptoKey):
-	fsType = buffer[0x3]
-	if fsType == Type.Fs.PFS0:
-		return Pfs0(buffer, cryptoKey = cryptoKey)
-		
-	if fsType == Type.Fs.ROMFS:
-		return Rom(buffer, cryptoKey = cryptoKey)
-		
-	return BaseFs(buffer, cryptoKey = cryptoKey)
-	
+
+
 class NcaHeader(File):
 	def __init__(self, path = None, mode = None, cryptoType = -1, cryptoKey = -1, cryptoCounter = -1):
 		self.signature1 = None
@@ -126,8 +111,6 @@ class NcaHeader(File):
 			key = self.keyBlock[offset:offset+0x10]
 			#Print.info('dec %d: %s' % (i, hx(key)))
 			self.keys.append(key)
-		
-		self.keyStatus = True
 
 		if self.hasTitleRights():
 			titleRightsTitleId = self.rightsId.decode()[0:16].upper()
@@ -135,8 +118,7 @@ class NcaHeader(File):
 			if titleRightsTitleId in Titles.keys() and Titles.get(titleRightsTitleId).key:
 				self.titleKeyDec = Keys.decryptTitleKey(uhx(Titles.get(titleRightsTitleId).key), self.masterKey)
 			else:
-				# Print.info('could not find title key %s!' % titleRightsTitleId)
-				self.keyStatus = False
+				Print.info('could not find title key %s!' % titleRightsTitleId)
 		else:
 			self.titleKeyDec = self.key()
 
@@ -217,7 +199,7 @@ class Nca(File):
 
 	def open(self, file = None, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1):
 		super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter)
-		
+
 		self.header = NcaHeader()
 		self.partition(0x0, 0xC00, self.header, Type.Crypto.XTS, uhx(Keys.get('header_key')))
 		#Print.info('partition complete, seeking')
@@ -225,39 +207,6 @@ class Nca(File):
 		#Print.info('reading')
 		#Hex.dump(self.header.read(0x200))
 		#sys.exit()
-		if self.header.keyStatus != True:
-			return
-
-		for i in range(4):
-			hdr = self.header.read(0x200)
-			section = BaseFs(hdr, cryptoKey = self.header.titleKeyDec)
-			fs = GetSectionFilesystem(hdr, cryptoKey = -1)
-			#Print.info('fs type = ' + hex(fs.fsType))
-			#Print.info('fs crypto = ' + hex(fs.cryptoType))
-			#Print.info('st end offset = ' + str(self.header.sectionTables[i].endOffset - self.header.sectionTables[i].offset))
-			#Print.info('fs offset = ' + hex(self.header.sectionTables[i].offset))
-			#Print.info('fs section start = ' + hex(fs.sectionStart))
-			#Print.info('titleKey = ' + hex(self.header.titleKeyDec))
-
-			self.partition(self.header.sectionTables[i].offset, self.header.sectionTables[i].endOffset - self.header.sectionTables[i].offset, section, cryptoKey = self.header.titleKeyDec)
-
-			try:
-				section.partition(fs.sectionStart, section.size - fs.sectionStart, fs)
-			except BaseException as e:
-				pass
-				#Print.info(e)
-				#raise
-
-			if fs.fsType:
-				self.sectionFilesystems.append(fs)
-				self.sections.append(section)
-			
-			try:
-				fs.open(None, 'rb')
-			except BaseException as e:
-				pass
-		
-		self.titleKeyDec = None
 
 	def masterKey(self):
 		return max(self.header.cryptoType, self.header.cryptoType2)

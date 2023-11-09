@@ -5,7 +5,10 @@ import requests
 import re
 
 from pathlib import Path
-from lib import Verify
+
+from nstools.nut import Keys
+
+from nstools.lib import Verify
 
 # set app path
 appPath = Path(sys.argv[0])
@@ -29,8 +32,8 @@ INCP_PATH = args.input
 WHOOK_URL = args.webhook_url
 SAVE_VLOG = bool(args.save_log)
 
-Verify.VerifyTools.Keys.load_default()
-if not Verify.VerifyTools.Keys.keys_loaded:
+Keys.load_default()
+if not Keys.keys_loaded:
     input("Press Enter to exit...")
     sys.exit(1)
 

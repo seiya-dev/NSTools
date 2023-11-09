@@ -5,7 +5,7 @@ import os.path
 from enum import IntEnum
 import hashlib
 
-from nut import aes128, Print, Hex
+from nstools.nut import aes128, Print, Hex
 
 from . import Type
 

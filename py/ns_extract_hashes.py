@@ -5,9 +5,12 @@ import sys
 
 from pathlib import Path
 
-from Fs import factory
-from Fs import Pfs0, Nca, Type
-from lib import FsTools
+from nstools.nut import Keys
+
+from nstools.Fs import factory
+from nstools.Fs import Pfs0, Nca, Type
+
+from nstools.lib import FsTools
 
 
 # set app path
@@ -28,8 +31,8 @@ args = parser.parse_args()
 
 INCP_PATH = args.input
 
-Pfs0.Keys.load_default()
-if not Pfs0.Keys.keys_loaded:
+Keys.load_default()
+if not Keys.keys_loaded:
     input("Press Enter to exit...")
     sys.exit(1)
 
