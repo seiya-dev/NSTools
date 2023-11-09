@@ -28,6 +28,11 @@ args = parser.parse_args()
 
 INCP_PATH = args.input
 
+Pfs0.Keys.load_default()
+if not Pfs0.Keys.keys_loaded:
+    input("Press Enter to exit...")
+    sys.exit(1)
+
 def send_hook(message_content):
     try:
         print(message_content)
@@ -52,7 +57,7 @@ def scan_file():
                     if isinstance(section, Pfs0.Pfs0):
                         Cnmt = section.getCnmt()
                         for entry in Cnmt.contentEntries:
-                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(byteorder = 'big')))
+                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(length=(min(entry.type.bit_length(), 1) + 7) // 8, byteorder = 'big')))
                             print(f'\n:{Cnmt.titleId} - Content.{entryType}')
                             print(f'> NCA ID: {entry.ncaId}')
                             print(f'> HASH: {entry.hash.hex()}')

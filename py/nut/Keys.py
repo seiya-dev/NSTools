@@ -11,6 +11,7 @@ keys = {}
 titleKeks = []
 keyAreaKeys = []
 loadedKeysFile = "non-existing prod.keys/keys.txt"
+keys_loaded = False
 
 #This are NOT the keys but only a 4 bytes long checksum!
 #See https://en.wikipedia.org/wiki/Cyclic_redundancy_check
@@ -125,6 +126,7 @@ def load(fileName):
 		global keyAreaKeys
 		global titleKeks
 		global loadedKeysFile
+		global keys_loaded
 		loadedKeysFile = fileName
 		
 		with open(fileName, encoding="utf8") as f:
@@ -154,43 +156,46 @@ def load(fileName):
 			keyAreaKeys[i][1] = generateKek(key_area_key_ocean_source, masterKey, aes_kek_generation_source, aes_key_generation_source)
 			keyAreaKeys[i][2] = generateKek(key_area_key_system_source, masterKey, aes_kek_generation_source, aes_key_generation_source)
 		
-		return True
+		keys_loaded = True
+		return keys_loaded
 	except BaseException as e:
 		Print.error(format_exc())
 		Print.error(str(e))
 		
-		return False
+		keys_loaded = False
+		return keys_loaded
 
+def load_default():
+	keyPyPath = Path(sys.argv[0])
+	while not keyPyPath.is_dir():
+		keyPyPath = keyPyPath.parents[0]
+	keyRootPath = Path(os.path.abspath(os.path.join(str(keyPyPath), '..')))
 
-keyPyPath = Path(sys.argv[0])
-while not keyPyPath.is_dir():
-	keyPyPath = keyPyPath.parents[0]
-keyRootPath = Path(os.path.abspath(os.path.join(str(keyPyPath), '..')))
+	keyfiles = [
+		Path.home().joinpath(".switch", "prod.keys"),
+		Path.home().joinpath(".switch", "keys.txt"),
+		keyRootPath.joinpath("prod.keys"),
+		keyRootPath.joinpath("keys.txt"),
+		keyPyPath.joinpath("prod.keys"),
+		keyPyPath.joinpath("keys.txt"),
+		Path(os.environ.get("NSTOOLS_KEYS_FILE", "$NSTOOLS_KEYS_FILE")),
+	]
 
-keyfiles = [
-	Path.home().joinpath(".switch", "prod.keys"),
-	Path.home().joinpath(".switch", "keys.txt"),
-	keyRootPath.joinpath("prod.keys"),
-	keyRootPath.joinpath("keys.txt"),
-	keyPyPath.joinpath("prod.keys"),
-	keyPyPath.joinpath("keys.txt"),
-]
-
-loaded = False
-for kf in keyfiles:
-	if kf.is_file():
-		loaded = load(str(kf))
-		if loaded == True:
-			print(f'[:INFO:] Keys Loaded: {str(kf)}')
-			break
-
-if loaded == False:
-	errorMsg = ""
+	keys_loaded = False
 	for kf in keyfiles:
-		if errorMsg != "":
-			errorMsg += "\nor "
-		errorMsg += f"{str(kf)}"
-	errorMsg += " not found\n\nPlease dump your keys using https://github.com/shchmue/Lockpick_RCM/releases\n"
-	Print.error(errorMsg)
-	input("Press Enter to exit...")
-	sys.exit(1)
+		if kf.is_file():
+			keys_loaded = load(str(kf))
+			if keys_loaded == True:
+				print(f'[:INFO:] Keys Loaded: {str(kf)}')
+				break
+
+	if keys_loaded == False:
+		errorMsg = ""
+		for kf in keyfiles:
+			if errorMsg != "":
+				errorMsg += "\nor "
+			errorMsg += f"{str(kf)}"
+		errorMsg += " not found\n\nPlease dump your keys using https://github.com/shchmue/Lockpick_RCM/releases\n"
+		errorMsg = "Failed to load default keys files:\n" + errorMsg
+		Print.error(errorMsg)
+	return keys_loaded
