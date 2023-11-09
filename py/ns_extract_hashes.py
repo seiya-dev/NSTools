@@ -5,8 +5,8 @@ import sys
 
 from pathlib import Path
 
-from FsNSZ.Open import factory
-from FsNSZ import Pfs0, Nca, Type
+from Fs import factory
+from Fs import Pfs0, Nca, Type
 from lib import FsTools
 
 

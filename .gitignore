@@ -2,6 +2,7 @@ __pycache__
 smartgit*
 
 /logs
+*_dev.py
 *.xci
 *.xcz
 *.nsp

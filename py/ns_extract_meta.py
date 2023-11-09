@@ -5,7 +5,7 @@ import sys
 
 from pathlib import Path
 
-from Fs.Open import factory
+from Fs import factory
 from Fs import Pfs0, Nca, Type
 
 from lib import FsTools

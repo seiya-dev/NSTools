@@ -11,7 +11,7 @@ from nut import Hex
 from nut import Keys
 from nut import Print
 
-from .Open import factory
+from . import factory
 from .File import BaseFile
 from .File import File
 from .Pfs0 import Pfs0

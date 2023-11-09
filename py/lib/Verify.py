@@ -16,7 +16,7 @@ import zstandard
 import enlighten
 
 # import Fs
-from Fs.Open import factory
+from Fs import factory
 from Fs import Xci, Nsp
 from Fs import Nca, Ticket
 from Fs import Type
