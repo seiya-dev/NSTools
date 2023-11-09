@@ -1,11 +1,13 @@
 __pycache__
 smartgit*
 
+/logs
 *.xci
 *.xcz
 *.nsp
 *.nsz
 
 *.log
+titles.json
 prod.keys
 keys.txt

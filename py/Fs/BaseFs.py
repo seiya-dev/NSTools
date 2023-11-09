@@ -1,11 +1,14 @@
-# from nsz import Fs
-from Fs.File import File
-from Fs import Type
-from nut import Print
-from Fs.File import MemoryFile
-from Fs.Cnmt import Cnmt
-from Fs import Bktr
 from binascii import hexlify as hx, unhexlify as uhx
+
+from nut import Print
+
+from . import Bktr
+from . import Type
+
+from .File import File
+from .File import MemoryFile
+from .Cnmt import Cnmt
+
 
 class EncryptedSection:
 	def __init__(self, offset, size, cryotoType, cryptoKey, cryptoCounter):

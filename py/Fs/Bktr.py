@@ -1,17 +1,19 @@
-from nut import aes128
-from nut import Hex
 from binascii import hexlify as hx, unhexlify as uhx
 from struct import pack as pk, unpack as upk
-from Fs.File import File, MemoryFile
 from hashlib import sha256
+
 import os
 import re
 import pathlib
+
+from nut import aes128
+from nut import Hex
 from nut import Keys, Print
 
+from .File import File, MemoryFile
+
+
 MEDIA_SIZE = 0x200
-
-
 
 class Header(File):
 	def __init__(self, path = None, mode = None, cryptoType = -1, cryptoKey = -1, cryptoCounter = -1, nca = None):
