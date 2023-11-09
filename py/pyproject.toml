@@ -5,6 +5,3 @@ requires = ["setuptools", "zstandard", "enlighten", "pycryptodome", "requests"]
 name = 'nstools'
 requires-python = ">=3.10"
 version = "1.0.7"
-
-[tool.setuptools]
-packages = ["Fs", "lib", "nut"]
