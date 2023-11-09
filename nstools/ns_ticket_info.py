@@ -1,15 +1,8 @@
-from binascii import hexlify as hx, unhexlify as uhx
-
 import os
 import sys
 
 from pathlib import Path
-
-from Fs.Open import factory
-from Fs import Pfs0, Nca, Type
-
-from lib import FsTools
-
+from Fs import factory, Ticket
 
 # set app path
 appPath = Path(sys.argv[0])
@@ -46,25 +39,11 @@ def scan_file():
     container.open(ipath, 'rb')
     if ipath.lower().endswith(('.xci', '.xcz')):
         container = container.hfs0['secure']
+    
     try:
         for nspf in container:
-            if isinstance(nspf, Nca.Nca) and nspf.header.contentType == Type.Content.META:
-                for section in nspf:
-                    if isinstance(section, Pfs0.Pfs0):
-                        Cnmt = section.getCnmt()
-                        
-                        titleType = FsTools.parse_cnmt_type_n(hx(Cnmt.titleType.to_bytes(byteorder = 'big')))
-                        
-                        print(f'\n:: CNMT: {Cnmt._path}\n')
-                        print(f'Title ID: {Cnmt.titleId.upper()}')
-                        print(f'Version: {Cnmt.version}')
-                        print(f'Title Type: {titleType}')
-                        
-                        for entry in Cnmt.contentEntries:
-                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(byteorder = 'big')))
-                            print(f'\n:{Cnmt.titleId} - Content.{entryType}')
-                            print(f'> NCA ID: {entry.ncaId}')
-                            print(f'> HASH: {entry.hash.hex()}')
+            if isinstance(nspf, Ticket.Ticket):
+                nspf.printInfo()
     finally:
         container.close()
     

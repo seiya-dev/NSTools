@@ -12,7 +12,7 @@ from nut import Keys
 from nut import Print
 from nut import Titles
 
-from .Open import factory
+from . import factory
 from .BaseFs import BaseFs
 from .File import File
 from .File import BaseFile

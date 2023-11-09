@@ -5,8 +5,9 @@ import sys
 
 from pathlib import Path
 
-from FsNSZ.Open import factory
-from FsNSZ import Pfs0, Nca, Type
+from Fs import factory
+from Fs import Pfs0, Nca, Type
+
 from lib import FsTools
 
 
@@ -51,6 +52,14 @@ def scan_file():
                 for section in nspf:
                     if isinstance(section, Pfs0.Pfs0):
                         Cnmt = section.getCnmt()
+                        
+                        titleType = FsTools.parse_cnmt_type_n(hx(Cnmt.titleType.to_bytes(byteorder = 'big')))
+                        
+                        print(f'\n:: CNMT: {Cnmt._path}\n')
+                        print(f'Title ID: {Cnmt.titleId.upper()}')
+                        print(f'Version: {Cnmt.version}')
+                        print(f'Title Type: {titleType}')
+                        
                         for entry in Cnmt.contentEntries:
                             entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(byteorder = 'big')))
                             print(f'\n:{Cnmt.titleId} - Content.{entryType}')
