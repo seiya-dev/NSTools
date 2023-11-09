@@ -8,5 +8,6 @@ smartgit*
 *.nsz
 
 *.log
+titles.json
 prod.keys
 keys.txt
