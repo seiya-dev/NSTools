@@ -69,10 +69,10 @@ class Hfs0Stream(BaseFile):
 			super(Hfs0Stream, self).close()
 
 	def getHeader(self):
-		stringTable = '\x00'.join(file['name'] for file in self.files)
+		stringTable = '\x00'.join(file['name'] for file in self.files)+'\x00'
 		
 		headerSize = 0x10 + len(self.files) * 0x40 + len(stringTable)
-	
+		
 		h = b''
 		h += b'HFS0'
 		h += len(self.files).to_bytes(4, byteorder='little')
