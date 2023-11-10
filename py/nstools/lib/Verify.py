@@ -63,7 +63,10 @@ def parse_name(file: str):
         'version': version,
     }
 
-def verify(file: str):
+def verify(file: str, vlevel: int = 3):
+    if vlevel not in range(1, 3, 1):
+        vlevel = 3
+    
     try:
         filename = os.path.abspath(file)
         
@@ -84,13 +87,15 @@ def verify(file: str):
         if check_decrypt == False:
             check = False
         
-        check_sig, headerlist, vmsg = verify_sig(f, vmsg)
-        if check_sig == False:
-            check = False
+        if vlevel > 1:
+            check_sig, headerlist, vmsg = verify_sig(f, vmsg)
+            if check_sig == False:
+                check = False
         
-        check_hash, vmsg = verify_hash(f, headerlist, vmsg)
-        if check_hash == False:
-            check = False
+        if vlevel > 2:
+            check_hash, vmsg = verify_hash(f, headerlist, vmsg)
+            if check_hash == False:
+                check = False
         
         f.flush()
         f.close()
