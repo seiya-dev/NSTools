@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
 	name='nstools',
-	version='1.0.5',
+	version='1.1.0',
 	url="https://github.com/seiya-dev/NSTools",
 	packages=['nstools.Fs', 'nstools.nut', 'nstools.lib'],
 	install_requires=[
