@@ -166,18 +166,15 @@ def load(fileName):
 		return keys_loaded
 
 def load_default():
-	keyPyPath = Path(sys.argv[0])
-	while not keyPyPath.is_dir():
-		keyPyPath = keyPyPath.parents[0]
-	keyRootPath = Path(os.path.abspath(os.path.join(str(keyPyPath), '..')))
+	keyScriptPath = Path(sys.argv[0])
+	while not keyScriptPath.is_dir():
+		keyScriptPath = keyScriptPath.parents[0]
 
 	keyfiles = [
 		Path.home().joinpath(".switch", "prod.keys"),
 		Path.home().joinpath(".switch", "keys.txt"),
-		keyRootPath.joinpath("prod.keys"),
-		keyRootPath.joinpath("keys.txt"),
-		keyPyPath.joinpath("prod.keys"),
-		keyPyPath.joinpath("keys.txt"),
+		keyScriptPath.joinpath("prod.keys"),
+		keyScriptPath.joinpath("keys.txt"),
 		Path(os.environ.get("NSTOOLS_KEYS_FILE", "$NSTOOLS_KEYS_FILE")),
 	]
 
