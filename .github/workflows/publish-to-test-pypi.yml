@@ -48,7 +48,10 @@ jobs:
         path: py/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-
+      with:
+          password: ${{ secrets.TOKEN }}
+          packages-dir: py/dist
+  
   github-release:
     name: >-
       Sign the Python 🐍 distribution 📦 with Sigstore
@@ -89,7 +92,7 @@ jobs:
       # sigstore-produced signatures and certificates.
       run: >-
         gh release upload
-        '${{ github.ref_name }}' dist/**
+        '${{ github.ref_name }}' py/dist/**
         --repo '${{ github.repository }}'
 
   publish-to-testpypi:
@@ -115,3 +118,5 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
+        password: ${{ secrets.TOKEN_TEST }}
+        packages-dir: py/dist

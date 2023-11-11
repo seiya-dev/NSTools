@@ -2,13 +2,13 @@ import setuptools
 
 setuptools.setup(
 	name='nstools',
-	version='1.1.0',
+	version='1.1.2',
 	url="https://github.com/seiya-dev/NSTools",
+	long_description="tools for xci/xcz/nsp/nsz",
 	packages=['nstools.Fs', 'nstools.nut', 'nstools.lib'],
 	install_requires=[
 		'zstandard',
 		'enlighten',
-		'requests',
 		'pycryptodome',
 	],
 	python_requires = '>=3.10',
