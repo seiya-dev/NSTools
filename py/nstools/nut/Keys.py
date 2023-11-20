@@ -183,7 +183,6 @@ def load_default():
 		if kf.is_file():
 			keys_loaded = load(str(kf))
 			if keys_loaded == True:
-				print(f'[:INFO:] Keys Loaded: {str(kf)}')
 				break
 
 	if keys_loaded == False:
