@@ -2,9 +2,9 @@ __pycache__
 smartgit*
 
 build/**
-!build.bat
-!build.sh
 !setup.py
+!setup-build.bat
+!setup-build.sh
 
 /logs
 *_dev.py

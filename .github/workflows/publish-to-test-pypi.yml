@@ -18,7 +18,7 @@ jobs:
         python3 -m pip install build --user
     - name: Build a binary wheel and a source tarball
       run: |
-        cp -r ./py ./build
+        cp -r ./py/* ./build
         cp LICENSE.md ./build
         cp README.md ./build
         python3 -m build build
