@@ -1,7 +1,10 @@
 __pycache__
-*.egg-info
-dist
 smartgit*
+
+build/**
+!build.bat
+!build.sh
+!setup.py
 
 /logs
 *_dev.py

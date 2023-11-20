@@ -15,17 +15,18 @@ jobs:
         python-version: "3.x"
     - name: Install pypa/build
       run: |
-        cd py
         python3 -m pip install build --user
     - name: Build a binary wheel and a source tarball
       run: |
-        cd py
-        python3 -m build
+        cp -r ./py ./build
+        cp LICENSE.md ./build
+        cp README.md ./build
+        python3 -m build build
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
       with:
         name: python-package-distributions
-        path: py/dist/
+        path: build/dist/
 
   publish-to-pypi:
     name: >-
@@ -45,12 +46,12 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: python-package-distributions
-        path: py/dist/
+        path: build/dist/
     - name: Publish distribution 📦 to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
           password: ${{ secrets.TOKEN }}
-          packages-dir: py/dist
+          packages-dir: build/dist
   
   github-release:
     name: >-
@@ -69,13 +70,13 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: python-package-distributions
-        path: py/dist/
+        path: build/dist/
     - name: Sign the dists with Sigstore
       uses: sigstore/gh-action-sigstore-python@v1.2.3
       with:
         inputs: >-
-          ./py/dist/*.tar.gz
-          ./py/dist/*.whl
+          ./build/dist/*.tar.gz
+          ./build/dist/*.whl
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -92,7 +93,7 @@ jobs:
       # sigstore-produced signatures and certificates.
       run: >-
         gh release upload
-        '${{ github.ref_name }}' py/dist/**
+        '${{ github.ref_name }}' build/dist/**
         --repo '${{ github.repository }}'
 
   publish-to-testpypi:
@@ -113,10 +114,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: python-package-distributions
-        path: py/dist/
+        path: build/dist/
     - name: Publish distribution 📦 to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
         password: ${{ secrets.TOKEN_TEST }}
-        packages-dir: py/dist
+        packages-dir: build/dist
