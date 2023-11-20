@@ -7,7 +7,7 @@ appPath = Path(os.path.abspath(__file__))
 while not appPath.is_dir():
     appPath = appPath.parents[0]
 
-readmePath = Path(os.path.abspath(f'{appPath}/../README.md'))
+readmePath = Path(os.path.abspath(f'{appPath}/README.md'))
 long_description = ''
 
 if readmePath.is_file():
@@ -16,7 +16,7 @@ if readmePath.is_file():
 
 setuptools.setup(
     name = 'nstools',
-    version = '1.1.5.dev3',
+    version = '1.1.5.dev4',
     url = 'https://github.com/seiya-dev/NSTools',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
