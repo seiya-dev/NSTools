@@ -18,8 +18,8 @@ appPath = os.path.abspath(appPath)
 print(f'[:INFO:] App Path: {appPath}')
 
 # set logs path
-logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
-print(f'[:INFO:] Logs Path: {logs_dir}')
+# logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
+# print(f'[:INFO:] Logs Path: {logs_dir}')
 
 import argparse
 parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -34,7 +34,7 @@ SAVE_VLOG = bool(args.save_log)
 
 Keys.load_default()
 if not Keys.keys_loaded:
-    input("Press Enter to exit...")
+    input('Press Enter to exit...')
     sys.exit(1)
 
 def send_hook(message_content: str = '', PadPrint: bool = False):
@@ -59,9 +59,9 @@ def scan_folder():
     ipath = os.path.abspath(INCP_PATH)
     fname = os.path.basename(ipath).upper()
     
-    lpath_badfolder = os.path.join(logs_dir, 'bad-folder.log')
-    lpath_badname = os.path.join(logs_dir, 'bad-names.log')
-    lpath_badfile = os.path.join(logs_dir, 'bad-file.log')
+    # lpath_badfolder = os.path.join(logs_dir, 'bad-folder.log')
+    # lpath_badname = os.path.join(logs_dir, 'bad-names.log')
+    # lpath_badfile = os.path.join(logs_dir, 'bad-file.log')
     
     if not os.path.exists(logs_dir):
         os.makedirs(logs_dir)
@@ -98,28 +98,28 @@ def scan_folder():
         
         if data is None:
             send_hook(f'{item_path}: BAD NAME')
-            with open(lpath_badname, 'a') as f:
-                f.write(f'{item_path}\n')
+            # with open(lpath_badname, 'a') as f:
+            #     f.write(f'{item_path}\n')
         
-        if data is not None and re.match(r'^BASE|UPD(ATE)?|DLC|XCI$', fname) is not None:
-            if item.lower().endswith(('.xci', '.xcz')):
-                iscart = True
-            else:
-                iscart = False
-            if fname == 'UPDATE':
-                fname = 'UPD'
-            if fname == 'BASE' and data['title_type'] != 'BASE' or fname == 'BASE' and iscart == True:
-                with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item_path}\n')
-            if fname == 'UPD' and data['title_type'] != 'UPD' or fname == 'UPD' and iscart == True:
-                with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item_path}\n')
-            if fname == 'DLC' and data['title_type'] != 'DLC' or fname == 'DLC' and iscart == True:
-                with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item_path}\n')
-            if fname == 'XCI' and iscart == False:
-                with open(lpath_badfolder, 'a') as f:
-                    f.write(f'{item_path}\n')
+        # if data is not None and re.match(r'^BASE|UPD(ATE)?|DLC|XCI$', fname) is not None:
+        #     if item.lower().endswith(('.xci', '.xcz')):
+        #         iscart = True
+        #     else:
+        #         iscart = False
+        #     if fname == 'UPDATE':
+        #         fname = 'UPD'
+        #     if fname == 'BASE' and data['title_type'] != 'BASE' or fname == 'BASE' and iscart == True:
+        #         with open(lpath_badfolder, 'a') as f:
+        #             f.write(f'{item_path}\n')
+        #     if fname == 'UPD' and data['title_type'] != 'UPD' or fname == 'UPD' and iscart == True:
+        #         with open(lpath_badfolder, 'a') as f:
+        #             f.write(f'{item_path}\n')
+        #     if fname == 'DLC' and data['title_type'] != 'DLC' or fname == 'DLC' and iscart == True:
+        #         with open(lpath_badfolder, 'a') as f:
+        #             f.write(f'{item_path}\n')
+        #     if fname == 'XCI' and iscart == False:
+        #         with open(lpath_badfolder, 'a') as f:
+        #             f.write(f'{item_path}\n')
         
         rootpath = os.path.dirname(item_path)
         basename = os.path.basename(item_path)
@@ -131,8 +131,8 @@ def scan_folder():
             nspTest, nspLog = Verify.verify(item_path)
             if nspTest != True:
                 send_hook(f'{item_path}: BAD', True)
-                with open(lpath_badfile, 'a') as f:
-                    f.write(f'{item_path}\n')
+                # with open(lpath_badfile, 'a') as f:
+                #     f.write(f'{item_path}\n')
             else:
                 send_hook(f'{item_path}: OK', True)
             if SAVE_VLOG == True:

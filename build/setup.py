@@ -16,14 +16,16 @@ if readmePath.is_file():
 
 setuptools.setup(
     name = 'nstools',
-    version = '1.1.5.dev5',
+    version = '1.1.5.dev10',
     url = 'https://github.com/seiya-dev/NSTools',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     license = 'MIT',
     
     scripts = [
-        'ns_verify_folder.py'
+        'bin/ns-verify-folder',
+        'bin/ns-verify-folder-log',
+        'ns_verify_folder.py',
     ],
     
     packages = [
