@@ -63,8 +63,8 @@ def scan_folder():
     # lpath_badname = os.path.join(logs_dir, 'bad-names.log')
     # lpath_badfile = os.path.join(logs_dir, 'bad-file.log')
     
-    if not os.path.exists(logs_dir):
-        os.makedirs(logs_dir)
+    # if not os.path.exists(logs_dir):
+    #     os.makedirs(logs_dir)
     
     # if os.path.exists(lpath_badfolder):
     #     os.remove(lpath_badfolder)
