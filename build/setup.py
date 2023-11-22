@@ -16,17 +16,28 @@ if readmePath.is_file():
 
 setuptools.setup(
     name = 'nstools',
-    version = '1.1.5.dev4',
+    version = '1.1.5.dev5',
     url = 'https://github.com/seiya-dev/NSTools',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
-    packages=['nstools.Fs', 'nstools.nut', 'nstools.lib'],
-    install_requires=[
+    license = 'MIT',
+    
+    scripts = [
+        'ns_verify_folder.py'
+    ],
+    
+    packages = [
+        'nstools.Fs',
+        'nstools.nut',
+        'nstools.lib'
+    ],
+    install_requires = [
         'zstandard',
         'enlighten',
         'pycryptodome',
     ],
+    
     python_requires = '>=3.10',
-    zip_safe = False,
+    zip_safe = True,
     include_package_data = True,
 )
