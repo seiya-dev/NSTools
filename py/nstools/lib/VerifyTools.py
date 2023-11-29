@@ -189,7 +189,7 @@ def verify_key(self, nca, ticket):
                         f.seek(0)
                         
                         ncaHeader = Nca.NcaHeader()
-                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader.open(File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
                         
                         pfs0 = fs
                         
@@ -218,7 +218,7 @@ def verify_key(self, nca, ticket):
                         f.seek(0)
                         
                         ncaHeader = Nca.NcaHeader()
-                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader.open(File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
                         ncaHeader = f.read(0x400)
                         
                         pfs0 = fs
@@ -250,7 +250,7 @@ def verify_key(self, nca, ticket):
                         f.seek(0)
                         
                         ncaHeader = Nca.NcaHeader()
-                        ncaHeader.open(Fs.File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
+                        ncaHeader.open(File.MemoryFile(f.read(0x400), Type.Crypto.XTS, uhx(Keys.get('header_key'))))
                         ncaHeader = f.read(0x400)
                         
                         pfs0 = fs
@@ -375,6 +375,5 @@ def verify_nca_sig_simple(self):
     return verify_data
     
 def verify_nca_sig(self, verify_data):
-    # this just useless additional checks, don't bother for now...
+    # this is just useless additional checks, don't bother for now...
     return verify_data
-    
