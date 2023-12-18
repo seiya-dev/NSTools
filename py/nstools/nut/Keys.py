@@ -173,6 +173,8 @@ def load_default():
 	keyfiles = [
 		Path.home().joinpath(".switch", "prod.keys"),
 		Path.home().joinpath(".switch", "keys.txt"),
+		Path("/sdcard/Documents/prod.keys"),
+		Path("/sdcard/Documents/keys.txt"),
 		keyScriptPath.joinpath("prod.keys"),
 		keyScriptPath.joinpath("keys.txt"),
 		Path(os.environ.get("NSTOOLS_KEYS_FILE", "$NSTOOLS_KEYS_FILE")),

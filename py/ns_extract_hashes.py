@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 from binascii import hexlify as hx, unhexlify as uhx
 
 import os
