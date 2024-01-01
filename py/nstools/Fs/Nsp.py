@@ -193,7 +193,7 @@ class Nsp(Pfs0):
 			if self.hasValidTicket is None:
 				self.setHasValidTicket(False)
 		else:
-			# print('unknown extension ' + str(path))
+			print('unknown extension ' + str(path))
 			return
 
 	def getPath(self):
@@ -450,4 +450,3 @@ class Nsp(Pfs0):
 				success = False
 
 		return success
-
