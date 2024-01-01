@@ -9,10 +9,10 @@ from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
 
 import io
 
+from nstools.nut import Hex
 from nstools.nut import Keys
 from nstools.nut import aes128
 
-from . import Hex
 from . import FsTools
 from . import Header, BlockDecompressorReader
 from .NcaKeys import getNcaModulusKey
