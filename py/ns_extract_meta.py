@@ -10,7 +10,7 @@ from pathlib import Path
 from nstools.nut import Keys
 
 from nstools.Fs import factory
-from nstools.Fs import Pfs0, Nca, Type
+from nstools.Fs import Pfs0, Xci, Nsp, Nca, Type
 
 from nstools.lib import FsTools
 
@@ -44,6 +44,38 @@ def send_hook(message_content):
     except:
         pass
 
+def get_cnmts(container):
+    cnmts = []
+    if isinstance(container, Nsp.Nsp):
+        try:
+            cnmt = container.cnmt()
+            cnmts.append(cnmt)
+        except Exception as e:
+            print(e)
+        
+    elif isinstance(container, Xci.Xci):
+        container = container.hfs0['secure']
+        for nspf in container:
+            if isinstance(nspf, Nca.Nca) and nspf.header.contentType == Type.Content.META:
+                cnmts.append(nspf)
+    
+    return cnmts
+
+def extract_meta_from_cnmt(cnmt_sections):
+    for section in cnmt_sections:
+        if isinstance(section, Pfs0.Pfs0):
+            Cnmt = section.getCnmt()
+            print(f'\n:: CNMT: {Cnmt._path}\n')
+            print(f'Title ID: {Cnmt.titleId.upper()}')
+            print(f'Version: {Cnmt.version}')
+            print(f'Title Type: {Cnmt.titleType}')
+
+            for entry in Cnmt.contentEntries:
+                entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(length=(min(entry.type.bit_length(), 1) + 7) // 8, byteorder = 'big')))
+                print(f'\n:{Cnmt.titleId} - Content.{entryType}')
+                print(f'> NCA ID: {entry.ncaId}')
+                print(f'> HASH: {entry.hash.hex()}')
+
 def scan_file():
     ipath = os.path.abspath(INCP_PATH)
     if not os.path.isfile(ipath):
@@ -52,28 +84,11 @@ def scan_file():
         return
     
     container = factory(Path(ipath).resolve())
-    container.open(ipath, 'rb')
-    if ipath.lower().endswith(('.xci', '.xcz')):
-        container = container.hfs0['secure']
+    container.open(ipath, 'rb', meta_only=True)
     try:
-        for nspf in container:
-            if isinstance(nspf, Nca.Nca) and nspf.header.contentType == Type.Content.META:
-                for section in nspf:
-                    if isinstance(section, Pfs0.Pfs0):
-                        Cnmt = section.getCnmt()
-                        
-                        titleType = FsTools.parse_cnmt_type_n(hx(Cnmt.titleType.to_bytes(length=(min(Cnmt.titleType.bit_length(), 1) + 7) // 8, byteorder = 'big')))
-                        
-                        print(f'\n:: CNMT: {Cnmt._path}\n')
-                        print(f'Title ID: {Cnmt.titleId.upper()}')
-                        print(f'Version: {Cnmt.version}')
-                        print(f'Title Type: {titleType}')
-                        
-                        for entry in Cnmt.contentEntries:
-                            entryType = FsTools.get_metacontent_type(hx(entry.type.to_bytes(length=(min(entry.type.bit_length(), 1) + 7) // 8, byteorder = 'big')))
-                            print(f'\n:{Cnmt.titleId} - Content.{entryType}')
-                            print(f'> NCA ID: {entry.ncaId}')
-                            print(f'> HASH: {entry.hash.hex()}')
+        for cnmt in get_cnmts(container):
+            extract_meta_from_cnmt(cnmt)
+
     finally:
         container.close()
     
