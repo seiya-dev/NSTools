@@ -51,7 +51,7 @@ class BaseFile:
 		self._bufferOffset = None
 		self._relativePos = 0x0
 			
-	def partition(self, offset = 0x0, size = None, n = None, cryptoType = -1, cryptoKey = -1, cryptoCounter = -1, autoOpen = True):
+	def partition(self, offset = 0x0, size = None, n = None, cryptoType = -1, cryptoKey = -1, cryptoCounter = -1, autoOpen = True, meta_only = False):
 		if not n:
 			n = File()
 		#Print.info('partition: ' + str(self) + ', ' + str(n))
@@ -69,7 +69,7 @@ class BaseFile:
 		
 		#Print.info('created partition for %s %x, size = %d' % (n.__class__.__name__, offset, size))
 		if autoOpen == True:
-			n.open(None, None, cryptoType, cryptoKey, cryptoCounter)
+			n.open(None, None, cryptoType, cryptoKey, cryptoCounter, meta_only)
 		
 		return n
 
@@ -206,7 +206,7 @@ class BaseFile:
 			self.cryptoType = Type.Crypto.NONE
 
 
-	def open(self, path, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1):
+	def open(self, path, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1, meta_only=False):
 		if path != None:
 			if self.isOpen():
 				self.close()
