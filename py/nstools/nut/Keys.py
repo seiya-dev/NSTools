@@ -46,7 +46,9 @@ crc32_checksum = {
 	'master_key_10': 788455323,
 	'master_key_11': 1214507020,
 	'master_key_12': 1051942134,
-	'master_key_13': 2476807835
+	'master_key_13': 2476807835,
+	'master_key_14': 2448653557,
+	'master_key_15': 4071812001
 }
 
 def getMasterKeyIndex(i):
