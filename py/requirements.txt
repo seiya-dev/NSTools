@@ -1,3 +1,4 @@
+git+https://github.com/nicoboss/nsz.git@c7b8d3a5617c16050966c6d9aca6a3a4b5e9f9d2
 zstandard
 enlighten
 requests

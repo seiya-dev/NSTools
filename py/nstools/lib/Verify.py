@@ -192,7 +192,7 @@ def verify_decrypt(nspx, vmsg = None):
                         vmsg.append(tvmsg)
                         if f.header.contentType != Type.Content.PROGRAM:
                             correct = VerifyTools.verify_enforcer(f)
-                            if correct == True and f.header.contentType == Type.Content.PUBLIC_DATA and f.header.getRightsId() == 0:
+                            if correct == True and f.header.contentType == Type.Content.PUBLICDATA and f.header.getRightsId() == 0:
                                 correct = VerifyTools.pr_noenc_check_dlc(f)
                                 if correct == False:
                                     bad_dec = True
