@@ -1,7 +1,7 @@
 from binascii import hexlify as hx, unhexlify as uhx
 from hashlib import sha256, sha1
-
 from copy import copy
+
 from . import FsNcaMod
 
 def get_ncz_data(src_nca):

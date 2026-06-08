@@ -7,13 +7,11 @@ import sys
 
 from pathlib import Path
 
-from nstools.nut import Keys
-
-from nstools.Fs import factory
-from nstools.Fs import Pfs0, Nca, Type
+from nsz.nut import Keys
+from nsz.Fs import factory
+from nsz.Fs import Pfs0, Nca, Type
 
 from nstools.lib import FsTools
-
 
 # set app path
 appPath = Path(sys.argv[0])

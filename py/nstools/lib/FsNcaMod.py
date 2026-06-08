@@ -2,18 +2,14 @@ from binascii import hexlify as hx, unhexlify as uhx
 from struct import pack as pk, unpack as upk
 from hashlib import sha256
 
-import os
-import re
-import pathlib
+from nsz.nut import aes128
+from nsz.nut import Hex
+from nsz.nut import Keys
+from nsz.nut import Print
+from nsz.nut import Titles
 
-from nstools.nut import aes128
-from nstools.nut import Hex
-from nstools.nut import Keys
-from nstools.nut import Print
-from nstools.nut import Titles
-
-from nstools.Fs import Type
-from nstools.Fs.File import File
+from nsz.Fs import Type
+from nsz.Fs.File import File
 
 
 MEDIA_SIZE = 0x200

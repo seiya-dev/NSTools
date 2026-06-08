@@ -1,4 +1,4 @@
-import binascii
+from binascii import a2b_base64
 
 class PublicCert:
     def getPublic(ctype = None):
@@ -86,5 +86,5 @@ class PublicCert:
         }
         if ctype not in certlist:
             ctype = 'Tinfoil'
-        chain = bytearray(binascii.a2b_base64(certlist[ctype]))
+        chain = bytearray(a2b_base64(certlist[ctype]))
         return chain

@@ -1,30 +1,25 @@
+from os.path import basename as fsBasename, abspath as fsAbsPath
 from binascii import hexlify as hx, unhexlify as uhx
+from re import search as re_search
 from hashlib import sha256, sha1
-
-import os
-import sys
-import re
-
 from pathlib import Path
+
+from zstandard import ZstdDecompressor
+from enlighten import Counter as pb_Counter
+
+from nsz import Header, BlockDecompressorReader
+from nsz.Fs import factory
+from nsz.Fs import Xci, Nsp
+from nsz.Fs import Nca, Ticket
+from nsz.Fs import Type
 
 from . import FsTools
 from . import VerifyTools
 from .FsCert import PublicCert
 
-import zstandard
-import enlighten
-
-from nstools.Fs import factory
-from nstools.Fs import Xci, Nsp
-from nstools.Fs import Nca, Ticket
-from nstools.Fs import Type
-
-from nsz import Header, BlockDecompressorReader
-
-
 def parse_name(file: str):
-    res_id = re.search(r'(?P<title_id>\[0100[A-F0-9]{12}\])', file)
-    res_ver = re.search(r'(?P<version>\[v\d+\])', file)
+    res_id = re_search(r'(?P<title_id>\[0100[A-F0-9]{12}\])', file)
+    res_ver = re_search(r'(?P<version>\[v\d+\])', file)
     
     if res_id is None or res_ver is None:
         return None
@@ -69,7 +64,7 @@ def verify(file: str, vlevel: int = 3):
         vlevel = 3
     
     try:
-        filename = os.path.abspath(file)
+        filename = fsAbsPath(file)
         
         check = True
         vmsg = list()
@@ -101,7 +96,7 @@ def verify(file: str, vlevel: int = 3):
         f.flush()
         f.close()
         
-        outlog = os.path.basename(file) + '\n'
+        outlog = fsBasename(file) + '\n'
         outlog += '\n'.join(vmsg) + '\n'
         
         return check, outlog
@@ -572,7 +567,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
             counter = 0
             mbDiv = 1048576
             BAR_FMT = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| {count:{len_total}d}/{total:d} {unit} [{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
-            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Hashing', unit='MiB', color='red', bar_format=BAR_FMT)
+            bar = pb_Counter(total = nca_size//mbDiv, desc='Hashing', unit='MiB', color='red', bar_format=BAR_FMT)
             
             i = 0
             f.rewind();
@@ -652,7 +647,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
             counter = 0
             mbDiv = 1048576
             BAR_FMT = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| {count:{len_total}d}/{total:d} {unit} [{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
-            bar = enlighten.Counter(total = nca_size//mbDiv, desc='Hashing', unit='MiB', color='red', bar_format=BAR_FMT)
+            bar = pb_Counter(total = nca_size//mbDiv, desc='Hashing', unit='MiB', color='red', bar_format=BAR_FMT)
             
             i = 0
             f.rewind();
@@ -705,7 +700,7 @@ def verify_hash(nspx, headerlist, vmsg = None):
             pos = f.tell()
             
             if not useBlockCompression:
-                decompressor = zstandard.ZstdDecompressor().stream_reader(f)
+                decompressor = ZstdDecompressor().stream_reader(f)
             
             spsize = 0
             

@@ -13,7 +13,6 @@ def expandFiles(path):
 			f = path.joinpath(f)
 			files.append(f)
 	return files
-	
 
 def isGame(filePath):
 	return filePath.suffix == '.nsp' or filePath.suffix == '.xci' or filePath.suffix == '.nsz' or filePath.suffix == '.xcz'

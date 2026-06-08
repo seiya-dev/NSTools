@@ -1,30 +1,24 @@
 #! /usr/bin/python3
 
-import os
-import sys
-import json
-import requests
-import re
-
+from os.path import dirname as fsDirname, basename as fsBasename, abspath as fsAbsPath, join as fsPathJoin, exists as fsExists, isfile as fsIsFile
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from sys import argv as sys_argv, exit as sys_exit
+from requests import post as req_post
+from json import dumps as json_dumps
 from pathlib import Path
 
 from nstools.nut import Keys
-
 from nstools.lib import Verify
 
 # set app path
-appPath = Path(sys.argv[0])
+appPath = Path(sys_argv[0])
 while not appPath.is_dir():
     appPath = appPath.parents[0]
-appPath = os.path.abspath(appPath)
+appPath = fsAbsPath(appPath)
 print(f'[:INFO:] App Path: {appPath}')
 
-# set logs path
-# logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
-# print(f'[:INFO:] Logs Path: {logs_dir}')
-
-import argparse
-parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
+# set args
+parser = ArgumentParser(formatter_class = ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input',  help = 'input folder')
 parser.add_argument('-w', '--webhook-url', help = 'discord webhook url', required = False)
 parser.add_argument('--save-log', help = 'save verify log', required = False, action='store_true')
@@ -37,7 +31,7 @@ SAVE_VLOG = bool(args.save_log)
 Keys.load_default()
 if not Keys.keys_loaded:
     input('Press Enter to exit...')
-    sys.exit(1)
+    sys_exit(1)
 
 def send_hook(message_content: str = '', PadPrint: bool = False):
     if message_content == '':
@@ -52,37 +46,24 @@ def send_hook(message_content: str = '', PadPrint: bool = False):
             'content': message_content.strip()
         }
         headers = {"Content-type": "application/json"}
-        response = requests.post(WHOOK_URL, data=json.dumps(payload), headers=headers)
+        response = req_post(WHOOK_URL, data=json_dumps(payload), headers=headers)
         response.raise_for_status()
     except:
         pass
 
 def scan_folder():
-    ipath = os.path.abspath(INCP_PATH)
-    fname = os.path.basename(ipath).upper()
+    ipath = fsAbsPath(INCP_PATH)
+    fname = fsBasename(ipath).upper()
     
-    # lpath_badfolder = os.path.join(logs_dir, 'bad-folder.log')
-    # lpath_badname = os.path.join(logs_dir, 'bad-names.log')
-    # lpath_badfile = os.path.join(logs_dir, 'bad-file.log')
-    
-    # if not os.path.exists(logs_dir):
-    #     os.makedirs(logs_dir)
-    
-    # if os.path.exists(lpath_badfolder):
-    #     os.remove(lpath_badfolder)
-    # if os.path.exists(lpath_badname):
-    #     os.remove(lpath_badname)
-    # if os.path.exists(lpath_badfile):
-    #     os.remove(lpath_badfile)
-    
-    if not os.path.exists(ipath):
+    if not fsExists(ipath):
         print(f'[:WARN:] Please put your files in "{ipath}" and run this script again.') 
         return
     
     files = list()
-    for item in sorted(os.listdir(ipath)):
-        item_path = os.path.join(ipath, item)
-        if not os.path.isfile(item_path):
+    
+    for item in sorted(list(Path(ipath).iterdir())):
+        item_path = fsPathJoin(ipath, item)
+        if not fsIsFile(item_path):
             continue
         if not item.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
             continue
@@ -90,7 +71,7 @@ def scan_folder():
     
     findex = 0
     for item in sorted(files):
-        item_path = os.path.join(ipath, item)
+        item_path = fsPathJoin(ipath, item)
         
         findex += 1
         send_hook(f'[:INFO:] File found ({findex} of {len(files)}): {item_path}', True)
@@ -123,10 +104,10 @@ def scan_folder():
         #         with open(lpath_badfolder, 'a') as f:
         #             f.write(f'{item_path}\n')
         
-        rootpath = os.path.dirname(item_path)
-        basename = os.path.basename(item_path)
+        rootpath = fsDirname(item_path)
+        basename = fsBasename(item_path)
         basename = f'{basename[:-4]}-{basename[-3:]}-verify'
-        log_name = os.path.join(rootpath, basename)
+        log_name = fsPathJoin(rootpath, basename)
         
         try:
             send_hook(f'[:INFO:] Verifying...')

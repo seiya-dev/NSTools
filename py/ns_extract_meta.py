@@ -1,10 +1,9 @@
 #! /usr/bin/python3
 
-from binascii import hexlify as hx, unhexlify as uhx
-
 import os
 import sys
 
+from binascii import hexlify as hx, unhexlify as uhx
 from pathlib import Path
 
 from nstools.nut import Keys
