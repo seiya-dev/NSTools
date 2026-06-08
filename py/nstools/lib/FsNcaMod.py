@@ -1,10 +1,7 @@
 from binascii import hexlify as hx, unhexlify as uhx
-from struct import pack as pk, unpack as upk
-from hashlib import sha256
 
 from nsz.nut import Keys
 from nsz.nut import Print
-from nsz.nut import Titles
 
 from nsz.Fs import Type
 from nsz.Fs.File import File
