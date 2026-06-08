@@ -6,5 +6,5 @@ Based on nut, NSC_B and nsz
 
 # pypi.org
 
-for using nsz.Fs, nstools.lib and nsz.nut:
+for using nstools, nsz.Fs and nsz.nut:
 https://pypi.org/project/nstools/

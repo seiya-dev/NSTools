@@ -9,7 +9,7 @@ from nsz.nut import Keys
 from nsz.Fs import factory
 from nsz.Fs import Pfs0, Nca, Type
 
-from nstools.lib import FsTools
+from nstools import FsTools
 
 # set app path
 appPath = Path(sys.argv[0])

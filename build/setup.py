@@ -16,7 +16,7 @@ if readmePath.is_file():
 
 setuptools.setup(
     name = 'nstools',
-    version = '1.2.3',
+    version = '2.0.0b1',
     url = 'https://github.com/seiya-dev/NSTools',
     long_description = long_description,
     long_description_content_type = 'text/markdown',
@@ -31,11 +31,10 @@ setuptools.setup(
     ],
     
     packages = [
-        'nstools.Fs',
-        'nstools.nut',
-        'nstools.lib',
+        'nstools',
     ],
     install_requires = [
+        'nsz @ git+https://github.com/nicoboss/nsz.git@2aac384',
         'zstandard',
         'enlighten',
         'requests',

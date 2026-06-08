@@ -6,8 +6,8 @@ import requests
 import json
 import sys
 
-from nstools.nut import Keys
-from nstools.lib import Verify
+from nsz.nut import Keys
+from nstools import Verify
 
 # set app path
 appPath = Path(sys.argv[0])

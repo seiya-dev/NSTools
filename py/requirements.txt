@@ -1,4 +1,4 @@
-git+https://github.com/nicoboss/nsz.git@2aac3844384faab09d566ebb653494c142c0000a
+git+https://github.com/nicoboss/nsz.git@2aac384
 zstandard
 enlighten
 requests>=2.32.3  # CVE-2024-35195 fixed in 2.32.0+
