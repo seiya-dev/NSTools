@@ -5,16 +5,14 @@ from nsz.nut import Print
 
 from nsz.Fs import Type
 from nsz.Fs.File import File
+from nsz.Fs.Nca import NcaHeader as NczHeader
 
-from nsz.Fs.Nca import SectionTableEntry
-from nsz.Fs.Nca import NcaHeader
-
-class Nca(File):
+class Ncz(File):
     def __init__(self, path = None, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1):
         self.header = None
         self.sectionFilesystems = []
         self.sections = []
-        super(Nca, self).__init__(path, mode, cryptoType, cryptoKey, cryptoCounter)
+        super(Ncz, self).__init__(path, mode, cryptoType, cryptoKey, cryptoCounter)
     
     def __iter__(self):
         return self.sectionFilesystems.__iter__()
@@ -23,9 +21,9 @@ class Nca(File):
         return self.sectionFilesystems[key]
     
     def open(self, file = None, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1, meta_only=False):
-        super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter, meta_only)
+        super(Ncz, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter, meta_only)
     
-        self.header = NcaHeader()
+        self.header = NczHeader()
         self.partition(0x0, 0xC00, self.header, Type.Crypto.XTS, uhx(Keys.get('header_key')))
         self.header.seek(0x400)
     
@@ -49,7 +47,7 @@ class Nca(File):
     def printInfo(self, maxDepth = 3, indent = 0):
         tabs = '\t' * indent
         Print.info('\n%sNCA Archive\n' % (tabs))
-        super(Nca, self).printInfo(maxDepth, indent)
+        super(Ncz, self).printInfo(maxDepth, indent)
         
         Print.info(tabs + 'magic = ' + str(self.header.magic))
         Print.info(tabs + 'titleId = ' + str(self.header.titleId))
