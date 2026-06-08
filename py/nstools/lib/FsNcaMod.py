@@ -18,10 +18,10 @@ class Nca(File):
     
     def __iter__(self):
         return self.sectionFilesystems.__iter__()
-        
+    
     def __getitem__(self, key):
         return self.sectionFilesystems[key]
-
+    
     def open(self, file = None, mode = 'rb', cryptoType = -1, cryptoKey = -1, cryptoCounter = -1, meta_only=False):
         super(Nca, self).open(file, mode, cryptoType, cryptoKey, cryptoCounter, meta_only)
     
@@ -68,7 +68,7 @@ class Nca(File):
         
         if(indent+1 < maxDepth):
             Print.info('\n%sPartitions:' % (tabs))
-        
+            
             for s in self:
                 s.printInfo(maxDepth, indent+1)
         
