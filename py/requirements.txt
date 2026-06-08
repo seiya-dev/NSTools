@@ -1,5 +1,5 @@
-git+https://github.com/nicoboss/nsz.git@c7b8d3a5617c16050966c6d9aca6a3a4b5e9f9d2  # nsz@c7b8d3a... only lists pycryptodome, zstandard, and enlighten
+git+https://github.com/nicoboss/nsz.git@2aac3844384faab09d566ebb653494c142c0000a
 zstandard
 enlighten
-requests==2.32.3  # CVE-2024-35195 fixed in 2.32.0+
-pycryptodome==3.21.0  # CVE-2023-52323 fixed in 3.20.0+
+requests>=2.32.3  # CVE-2024-35195 fixed in 2.32.0+
+pycryptodome>=3.21.0  # CVE-2023-52323 fixed in 3.20.0+
