@@ -45,7 +45,7 @@ def send_hook(message_content: str = '', PadPrint: bool = False):
             'content': message_content.strip()
         }
         headers = {"Content-type": "application/json"}
-        response = req_post(WHOOK_URL, data=json_dumps(payload), headers=headers)
+        response = requests.post(WHOOK_URL, data=json.dumps(payload), headers=headers)
         response.raise_for_status()
     except:
         pass
