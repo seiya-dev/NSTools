@@ -77,7 +77,8 @@ def scan_file():
         return
     
     container = factory(Path(ipath).resolve())
-    container.open(ipath, 'rb', meta_only=True)
+    container.open(ipath, meta_only=True)
+    
     try:
         for cnmt in get_cnmts(container):
             extract_meta_from_cnmt(cnmt)

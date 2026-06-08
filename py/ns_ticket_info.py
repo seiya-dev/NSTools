@@ -41,8 +41,9 @@ def scan_file():
         return
     
     container = factory(Path(ipath).resolve())
-    container.open(ipath, 'rb')
-    if ipath.lower().endswith(('.xci', '.xcz')):
+    container.open(ipath)
+    
+    if ipath.name.lower().endswith(('.xci', '.xcz')):
         container = container.hfs0['secure']
     
     try:

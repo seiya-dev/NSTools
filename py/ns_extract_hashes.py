@@ -45,9 +45,11 @@ def scan_file():
         return
     
     container = factory(Path(ipath).resolve())
-    container.open(ipath, 'rb')
+    container.open(ipath)
+    
     if ipath.lower().endswith(('.xci', '.xcz')):
         container = container.hfs0['secure']
+    
     try:
         for nspf in container:
             if isinstance(nspf, Nca.Nca) and nspf.header.contentType == Type.Content.META:
