@@ -1,11 +1,10 @@
 #! /usr/bin/python3
 
 from binascii import hexlify as hx, unhexlify as uhx
-
-import os
-import sys
-
 from pathlib import Path
+import argparse
+import sys
+import os
 
 from nsz.nut import Keys
 from nsz.Fs import factory
@@ -17,14 +16,10 @@ from nstools.lib import FsTools
 appPath = Path(sys.argv[0])
 while not appPath.is_dir():
     appPath = appPath.parents[0]
-appPath = os.path.abspath(appPath)
+appPath = Path(appPath).resolve().as_posix()
 print(f'[:INFO:] App Path: {appPath}')
 
-# set logs path
-# logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
-# print(f'[:INFO:] Logs Path: {logs_dir}')
-
-import argparse
+# set args
 parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input',  help = 'input file')
 args = parser.parse_args()

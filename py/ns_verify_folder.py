@@ -1,24 +1,23 @@
 #! /usr/bin/python3
 
-from os.path import dirname as fsDirname, basename as fsBasename, abspath as fsAbsPath, join as fsPathJoin, exists as fsExists, isfile as fsIsFile
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from sys import argv as sys_argv, exit as sys_exit
-from requests import post as req_post
-from json import dumps as json_dumps
 from pathlib import Path
+import argparse
+import requests
+import json
+import sys
 
 from nstools.nut import Keys
 from nstools.lib import Verify
 
 # set app path
-appPath = Path(sys_argv[0])
+appPath = Path(sys.argv[0])
 while not appPath.is_dir():
     appPath = appPath.parents[0]
-appPath = fsAbsPath(appPath)
+appPath = Path(appPath).resolve().as_posix()
 print(f'[:INFO:] App Path: {appPath}')
 
 # set args
-parser = ArgumentParser(formatter_class = ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input',  help = 'input folder')
 parser.add_argument('-w', '--webhook-url', help = 'discord webhook url', required = False)
 parser.add_argument('--save-log', help = 'save verify log', required = False, action='store_true')
@@ -31,7 +30,7 @@ SAVE_VLOG = bool(args.save_log)
 Keys.load_default()
 if not Keys.keys_loaded:
     input('Press Enter to exit...')
-    sys_exit(1)
+    sys.exit(1)
 
 def send_hook(message_content: str = '', PadPrint: bool = False):
     if message_content == '':
@@ -52,44 +51,43 @@ def send_hook(message_content: str = '', PadPrint: bool = False):
         pass
 
 def scan_folder():
-    ipath = fsAbsPath(INCP_PATH)
-    fname = fsBasename(ipath).upper()
+    ipath = Path(INCP_PATH).resolve().as_posix()
     
-    if not fsExists(ipath):
+    if not Path(ipath).exists():
         print(f'[:WARN:] Please put your files in "{ipath}" and run this script again.') 
         return
     
     files = list()
     
     for item in sorted(list(Path(ipath).iterdir())):
-        item_path = fsPathJoin(ipath, item)
-        if not fsIsFile(item_path):
+        item_path = Path(item)
+        if not item_path.is_file() or item_path.is_symlink():
             continue
-        if not item.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
+        if not item_path.name.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
             continue
-        files.append(item)
+        files.append(item.as_posix())
     
     findex = 0
     for item in sorted(files):
-        item_path = fsPathJoin(ipath, item)
+        item_path = Path(item)
         
         findex += 1
-        send_hook(f'[:INFO:] File found ({findex} of {len(files)}): {item_path}', True)
+        send_hook(f'[:INFO:] File found ({findex} of {len(files)}): {item_path.name}', True)
         send_hook(f'[:INFO:] Checking filename...')
         
-        data = Verify.parse_name(item)
+        data = Verify.parse_name(item_path.name)
         
         if data is None:
-            send_hook(f'{item_path}: BAD NAME')
+            send_hook(f'{item_path.name}: BAD NAME')
         
-        rootpath = fsDirname(item_path)
-        basename = fsBasename(item_path)
+        rootpath = item_path.parent.as_posix()
+        basename = item_path.name
         basename = f'{basename[:-4]}-{basename[-3:]}-verify'
-        log_name = fsPathJoin(rootpath, basename)
+        log_name = Path(rootpath).joinpath(basename).as_posix()
         
         try:
             send_hook(f'[:INFO:] Verifying...')
-            nspTest, nspLog = Verify.verify(item_path)
+            nspTest, nspLog = Verify.verify(item_path.as_posix())
             if nspTest != True:
                 send_hook(f'{item_path}: BAD', True)
             else:
@@ -103,7 +101,6 @@ def scan_folder():
                         f.write(f'{nspLog}')
         except Exception as e:
             send_hook(f'[:WARN:] An error occurred:\n{item_path}: {str(e)}')
-
 
 if __name__ == "__main__":
     if INCP_PATH:

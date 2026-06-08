@@ -1,26 +1,21 @@
 #! /usr/bin/python3
 
-import os
-import sys
-
 from pathlib import Path
+import argparse
+import sys
+import os
 
-from nstools.nut import Keys
-
-from nstools.Fs import factory, Ticket
+from nsz.nut import Keys
+from nsz.Fs import factory, Ticket
 
 # set app path
 appPath = Path(sys.argv[0])
 while not appPath.is_dir():
     appPath = appPath.parents[0]
-appPath = os.path.abspath(appPath)
+appPath = Path(appPath).resolve().as_posix()
 print(f'[:INFO:] App Path: {appPath}')
 
-# set logs path
-# logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
-# print(f'[:INFO:] Logs Path: {logs_dir}')
-
-import argparse
+# set args
 parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input',  help = 'input file')
 args = parser.parse_args()
