@@ -3,7 +3,6 @@
 from pathlib import Path
 import argparse
 import sys
-import os
 
 from nsz.nut import Keys
 from nsz.Fs import factory, Ticket
@@ -34,10 +33,11 @@ def send_hook(message_content):
         pass
 
 def scan_file():
-    ipath = os.path.abspath(INCP_PATH)
-    if not os.path.isfile(ipath):
+    ipath = Path(INCP_PATH).resolve().as_posix()
+    
+    if not Path(ipath).is_file() or Path(ipath).is_symlink():
         return
-    if not ipath.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
+    if not Path(ipath).name.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
         return
     
     container = factory(Path(ipath).resolve())
