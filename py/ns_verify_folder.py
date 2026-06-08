@@ -81,28 +81,6 @@ def scan_folder():
         
         if data is None:
             send_hook(f'{item_path}: BAD NAME')
-            # with open(lpath_badname, 'a') as f:
-            #     f.write(f'{item_path}\n')
-        
-        # if data is not None and re.match(r'^BASE|UPD(ATE)?|DLC|XCI$', fname) is not None:
-        #     if item.lower().endswith(('.xci', '.xcz')):
-        #         iscart = True
-        #     else:
-        #         iscart = False
-        #     if fname == 'UPDATE':
-        #         fname = 'UPD'
-        #     if fname == 'BASE' and data['title_type'] != 'BASE' or fname == 'BASE' and iscart == True:
-        #         with open(lpath_badfolder, 'a') as f:
-        #             f.write(f'{item_path}\n')
-        #     if fname == 'UPD' and data['title_type'] != 'UPD' or fname == 'UPD' and iscart == True:
-        #         with open(lpath_badfolder, 'a') as f:
-        #             f.write(f'{item_path}\n')
-        #     if fname == 'DLC' and data['title_type'] != 'DLC' or fname == 'DLC' and iscart == True:
-        #         with open(lpath_badfolder, 'a') as f:
-        #             f.write(f'{item_path}\n')
-        #     if fname == 'XCI' and iscart == False:
-        #         with open(lpath_badfolder, 'a') as f:
-        #             f.write(f'{item_path}\n')
         
         rootpath = fsDirname(item_path)
         basename = fsBasename(item_path)
@@ -114,8 +92,6 @@ def scan_folder():
             nspTest, nspLog = Verify.verify(item_path)
             if nspTest != True:
                 send_hook(f'{item_path}: BAD', True)
-                # with open(lpath_badfile, 'a') as f:
-                #     f.write(f'{item_path}\n')
             else:
                 send_hook(f'{item_path}: OK', True)
             if SAVE_VLOG == True:

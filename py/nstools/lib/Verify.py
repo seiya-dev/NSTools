@@ -1,7 +1,7 @@
 from os.path import basename as fsBasename, abspath as fsAbsPath
 from binascii import hexlify as hx, unhexlify as uhx
 from re import search as re_search
-from hashlib import sha256, sha1
+from hashlib import sha256
 from pathlib import Path
 
 from zstandard import ZstdDecompressor
