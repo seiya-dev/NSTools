@@ -13,8 +13,9 @@ from nstools.nut import Hex
 from nstools.nut import Keys
 from nstools.nut import aes128
 
+from nsz import Header, BlockDecompressorReader
+
 from . import FsTools
-from . import Header, BlockDecompressorReader
 from .NcaKeys import getNcaModulusKey
 
 import zstandard

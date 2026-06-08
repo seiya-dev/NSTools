@@ -9,7 +9,6 @@ from pathlib import Path
 
 from . import FsTools
 from . import VerifyTools
-from . import Header, BlockDecompressorReader
 from .FsCert import PublicCert
 
 import zstandard
@@ -19,6 +18,8 @@ from nstools.Fs import factory
 from nstools.Fs import Xci, Nsp
 from nstools.Fs import Nca, Ticket
 from nstools.Fs import Type
+
+from nsz import Header, BlockDecompressorReader
 
 
 def parse_name(file: str):
