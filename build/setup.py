@@ -34,7 +34,7 @@ setuptools.setup(
         'nstools',
     ],
     install_requires = [
-        'nsz @ git+https://github.com/nicoboss/nsz.git@2aac384',
+        'nsz @ git+https://github.com/nicoboss/nsz.git@d93f515a0901fcf598af7a3349b62c0bc5aa2c4c',
         'zstandard',
         'enlighten',
         'requests',
