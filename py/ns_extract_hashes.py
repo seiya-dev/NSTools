@@ -1,32 +1,24 @@
 #! /usr/bin/python3
 
 from binascii import hexlify as hx, unhexlify as uhx
-
-import os
+from pathlib import Path
+import argparse
 import sys
 
-from pathlib import Path
+from nsz.nut import Keys
+from nsz.Fs import factory
+from nsz.Fs import Pfs0, Nca, Type
 
-from nstools.nut import Keys
-
-from nstools.Fs import factory
-from nstools.Fs import Pfs0, Nca, Type
-
-from nstools.lib import FsTools
-
+from nstools import FsTools
 
 # set app path
 appPath = Path(sys.argv[0])
 while not appPath.is_dir():
     appPath = appPath.parents[0]
-appPath = os.path.abspath(appPath)
+appPath = Path(appPath).resolve().as_posix()
 print(f'[:INFO:] App Path: {appPath}')
 
-# set logs path
-# logs_dir = os.path.abspath(os.path.join(appPath, '..', 'logs'))
-# print(f'[:INFO:] Logs Path: {logs_dir}')
-
-import argparse
+# set args
 parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-i', '--input',  help = 'input file')
 args = parser.parse_args()
@@ -45,16 +37,19 @@ def send_hook(message_content):
         pass
 
 def scan_file():
-    ipath = os.path.abspath(INCP_PATH)
-    if not os.path.isfile(ipath):
+    ipath = Path(INCP_PATH).resolve().as_posix()
+    
+    if not Path(ipath).is_file() or Path(ipath).is_symlink():
         return
-    if not ipath.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
+    if not Path(ipath).name.lower().endswith(('.xci', '.xcz', '.nsp', '.nsz')):
         return
     
     container = factory(Path(ipath).resolve())
-    container.open(ipath, 'rb')
+    container.open(ipath)
+    
     if ipath.lower().endswith(('.xci', '.xcz')):
         container = container.hfs0['secure']
+    
     try:
         for nspf in container:
             if isinstance(nspf, Nca.Nca) and nspf.header.contentType == Type.Content.META:

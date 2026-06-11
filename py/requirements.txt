@@ -1,4 +1,5 @@
+git+https://github.com/nicoboss/nsz.git@d93f515a0901fcf598af7a3349b62c0bc5aa2c4c  # 2026-06-10T18:16:14.000Z
 zstandard
 enlighten
-requests
-pycryptodome
+requests>=2.32.3  # CVE-2024-35195 fixed in 2.32.0+
+pycryptodome>=3.21.0  # CVE-2023-52323 fixed in 3.20.0+

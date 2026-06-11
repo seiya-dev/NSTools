@@ -7,23 +7,19 @@ from Crypto.Util import Counter
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5, PKCS1_PSS
 
-import io
+from zstandard import ZstdDecompressor
 
-from nstools.nut import Hex
-from nstools.nut import Keys
-from nstools.nut import aes128
+from nsz import Header, BlockDecompressorReader
+from nsz.nut import Hex
+from nsz.nut import Keys
+from nsz.nut import aes128
+from nsz.Fs import Type
+from nsz.Fs import File
+from nsz.Fs import Nca
+from nsz.Fs import Ticket
 
 from . import FsTools
-from . import Header, BlockDecompressorReader
 from .NcaKeys import getNcaModulusKey
-
-import zstandard
-
-from nstools.Fs import Type
-from nstools.Fs import File
-from nstools.Fs import Nca
-from nstools.Fs import Ticket
-
 
 RSA_PUBLIC_EXPONENT = 0x10001
 FS_HEADER_LENGTH = 0x200
@@ -136,7 +132,7 @@ def verify_ncz(self, target):
             pos = f.tell()
             
             if not useBlockCompression:
-                decompressor = zstandard.ZstdDecompressor().stream_reader(f)
+                decompressor = ZstdDecompressor().stream_reader(f)
             
             count = 0
             checkstarter = 0

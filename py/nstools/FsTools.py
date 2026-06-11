@@ -1,12 +1,12 @@
 from binascii import hexlify as hx, unhexlify as uhx
 from hashlib import sha256, sha1
-
 from copy import copy
-from . import FsNcaMod
+
+from .FsNcz import Ncz
 
 def get_ncz_data(src_nca):
     nca = copy(src_nca)
-    nca = FsNcaMod.Nca(nca)
+    nca = Ncz(nca)
     return nca
 
 def get_data_from_cnmt(nca):
