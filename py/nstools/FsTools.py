@@ -88,11 +88,11 @@ def get_data_from_cnmt(nca):
                 
                 unknown = cnmt.read(0x1)
                 
-                if ncaType != "DeltaFragment":
+                if ncaType != 'DeltaFragment':
                     data['installedSize'] = data['installedSize'] + size
                 else:
                      data['deltaSize'] = data['deltaSize'] + size
-                if ncaType == "HtmlDocument":
+                if ncaType == 'HtmlDocument':
                     data['hasHtmlManual'] = True
                 
                 nca_data.append(cdata)
