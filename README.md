@@ -8,3 +8,6 @@ Based on nut, NSC_B and nsz
 
 for using nstools, nsz.Fs and nsz.nut:
 https://pypi.org/project/nstools/
+
+nsz required:
+pip install git+https://github.com/nicoboss/nsz.git@master
