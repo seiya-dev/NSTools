@@ -16,7 +16,7 @@ if readmePath.is_file():
 
 setuptools.setup(
     name = 'nstools',
-    version = '2.0.0b5',
+    version = '2.0.0b7',
     url = 'https://github.com/seiya-dev/NSTools',
     long_description = long_description,
     long_description_content_type = 'text/markdown',

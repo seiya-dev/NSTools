@@ -238,13 +238,13 @@ def verify_decrypt(nspx, vmsg = None):
                         tik_data = f
                         break
                 
-                if len(titlerights) < 1 or tik_data.rightsId == 0 or tik_data.rightsId == None:
+                if len(titlerights) < 1 or tik_data.rightsId == 0 or tik_data.rightsId is None:
                     check_tik = 'unused'
                 
                 if check_tik == False:
                     for f in temp_hfs:
                         if f._path.endswith('.nca'):
-                            if f.header.getRightsId() == tik_data.rightsId and f.header.keyStatus == False:
+                            if f.header.getRightsId() == tik_data.rightsId and f.header.titleKeyDec is None:
                                 check_tik = 'nca'
                                 break
                             if f.header.getRightsId() == tik_data.rightsId:
